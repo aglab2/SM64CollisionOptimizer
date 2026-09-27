@@ -1,3 +1,9 @@
+#pragma once
+
+#define sqr(x) ({         \
+    __auto_type _x = (x); \
+    _x * _x; })
+
 // Get the minimum / maximum of a set of numbers
 #undef MIN
 #define MIN(a, b) ({      \
@@ -22,3 +28,60 @@
 #define max_3f max_3
 #define max_3i max_3
 #define max_3s max_3
+
+// Get the maximum and minimum of three numbers at the same time.
+#define min_max_3_func(a, b, c, min, max) { \
+    if (b < a) {                            \
+        *max = a;                           \
+        *min = b;                           \
+    } else {                                \
+        *min = a;                           \
+        *max = b;                           \
+    }                                       \
+    if (c < *min) *min = c;                 \
+    if (c > *max) *max = c;                 \
+}
+
+static inline __attribute__((always_inline)) void min_max_3f(f32 a, f32 b, f32 c, f32 *min, f32 *max) { min_max_3_func(a, b, c, min, max); }
+static inline __attribute__((always_inline)) void min_max_3i(s32 a, s32 b, s32 c, s32 *min, s32 *max) { min_max_3_func(a, b, c, min, max); }
+static inline __attribute__((always_inline)) void min_max_3s(s16 a, s16 b, s16 c, s16 *min, s16 *max) { min_max_3_func(a, b, c, min, max); }
+
+#define vec3_scale_dest(dst, src, x) {  \
+    __auto_type _x = (src)[0] * (x);    \
+    __auto_type _y = (src)[1] * (x);    \
+    __auto_type _z = (src)[2] * (x);    \
+    (dst)[0] = _x;                      \
+    (dst)[1] = _y;                      \
+    (dst)[2] = _z;                      \
+}
+
+#define vec3_copy(dst, src) {           \
+    __auto_type _x = (src)[0];          \
+    __auto_type _y = (src)[1];          \
+    __auto_type _z = (src)[2];          \
+    (dst)[0] = _x;                      \
+    (dst)[1] = _y;                      \
+    (dst)[2] = _z;                      \
+}
+#define vec3f_copy vec3_copy
+#define vec3i_copy vec3_copy
+#define vec3s_copy vec3_copy
+
+#define vec3_scale_dest(dst, src, x) {  \
+    __auto_type _x = (src)[0] * (x);    \
+    __auto_type _y = (src)[1] * (x);    \
+    __auto_type _z = (src)[2] * (x);    \
+    (dst)[0] = _x;                      \
+    (dst)[1] = _y;                      \
+    (dst)[2] = _z;                      \
+}
+#define vec3_scale(dst, x) vec3_scale_dest(dst, dst, x)
+
+#define vec2_dot(a, b)       (((a)[0] * (b)[0]) + ((a)[1] * (b)[1]))
+#define vec3_dot(a, b)      (vec2_dot((a), (b)) + ((a)[2] * (b)[2]))
+
+#define find_vector_perpendicular_to_plane(dest, a, b, c) {                                     \
+    (dest)[0] = ((b)[1] - (a)[1]) * ((c)[2] - (b)[2]) - ((c)[1] - (b)[1]) * ((b)[2] - (a)[2]);  \
+    (dest)[1] = ((b)[2] - (a)[2]) * ((c)[0] - (b)[0]) - ((c)[2] - (b)[2]) * ((b)[0] - (a)[0]);  \
+    (dest)[2] = ((b)[0] - (a)[0]) * ((c)[1] - (b)[1]) - ((c)[0] - (b)[0]) * ((b)[1] - (a)[1]);  \
+}

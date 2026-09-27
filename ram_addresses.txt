@@ -1,0 +1,46 @@
+                0x0000000080382490                alloc_surface_node
+                0x00000000803824f8                alloc_surface
+                0x0000000080382590                clear_spatial_partition
+                0x00000000803825d0                clear_static_surfaces
+                0x00000000803825fc                add_surface_to_cell
+                0x000000008038283c                min_3
+                0x000000008038289c                max_3
+                0x00000000803828fc                lower_cell_index
+                0x0000000080382990                upper_cell_index
+                0x0000000080382a2c                add_surface
+                0x0000000080382b7c                read_surface_data
+                0x0000000080382f84                surface_has_force
+                0x0000000080382fec                surf_has_no_cam_collision
+                0x0000000080383068                load_static_surfaces
+                0x00000000803831d0                read_vertex_data
+                0x0000000080383228                load_environmental_regions
+                0x0000000080383340                alloc_surface_pools
+                0x00000000803833b8                load_area_terrain
+                0x00000000803835a4                clear_dynamic_surfaces
+                0x0000000080383614                transform_object_vertices
+                0x0000000080383828                load_object_surfaces
+                0x00000000803839cc                load_object_collision_model
+
+                0x0000000080380de8                f32_find_wall_collision
+                0x0000000080380e8c                find_wall_collisions
+                0x0000000080381264                find_ceil
+                0x0000000080381470                unused_obj_find_floor_height
+                0x00000000803814b8                find_floor_height_and_data
+                0x0000000080381794                find_floor_height
+                0x00000000803817e0                unused_find_dynamic_floor
+                0x0000000080381900                find_floor
+                0x0000000080381ba0                find_water_level
+                0x0000000080381d3c                find_poison_gas_level
+                0x0000000080381f08                debug_surface_list_info
+                0x0000000080382294                unused_resolve_floor_or_ceil_collisions
+
+                0x00000000802559b0                stop_and_set_height_to_floor
+                0x0000000080255a34                stationary_ground_step
+                0x0000000080255b04                perform_ground_quarter_step
+                0x0000000080255d88                perform_ground_step
+                0x0000000080255ec4                check_ledge_grab
+                0x00000000802560ac                perform_air_quarter_step
+                0x00000000802564e0                apply_twirl_gravity
+
+                0x0000000080256b24                perform_air_step
+                0x0000000080256cd8                set_vel_from_pitch_and_yaw

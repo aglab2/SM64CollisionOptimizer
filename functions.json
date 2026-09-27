@@ -59,8 +59,8 @@
     "name": "set_vel_from_pitch_and_yaw",
     "ram_addr": "0x80256CD8",
     "rom_addr": "0x000000011CD8",
-    "length_bytes": null,
-    "length_hex": null
+    "length_bytes": 1220880,
+    "length_hex": "0x12A110"
   },
   {
     "name": "f32_find_wall_collision",

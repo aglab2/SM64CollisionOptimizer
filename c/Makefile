@@ -13,7 +13,9 @@ CPP_FILES = \
 	load_static_surfaces \
 	load_environmental_regions \
 	load_area_terrain \
-	clear_dynamic_surfaces
+	clear_dynamic_surfaces \
+	transform_object_vertices \
+	load_object_surfaces
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

@@ -1,0 +1,303 @@
+[
+  {
+    "name": "stop_and_set_height_to_floor",
+    "ram_addr": "0x802559B0",
+    "rom_addr": "0x0000000109B0",
+    "length_bytes": 132,
+    "length_hex": "0x84"
+  },
+  {
+    "name": "stationary_ground_step",
+    "ram_addr": "0x80255A34",
+    "rom_addr": "0x000000010A34",
+    "length_bytes": 208,
+    "length_hex": "0xD0"
+  },
+  {
+    "name": "perform_ground_quarter_step",
+    "ram_addr": "0x80255B04",
+    "rom_addr": "0x000000010B04",
+    "length_bytes": 644,
+    "length_hex": "0x284"
+  },
+  {
+    "name": "perform_ground_step",
+    "ram_addr": "0x80255D88",
+    "rom_addr": "0x000000010D88",
+    "length_bytes": 316,
+    "length_hex": "0x13C"
+  },
+  {
+    "name": "check_ledge_grab",
+    "ram_addr": "0x80255EC4",
+    "rom_addr": "0x000000010EC4",
+    "length_bytes": 488,
+    "length_hex": "0x1E8"
+  },
+  {
+    "name": "perform_air_quarter_step",
+    "ram_addr": "0x802560AC",
+    "rom_addr": "0x0000000110AC",
+    "length_bytes": 1076,
+    "length_hex": "0x434"
+  },
+  {
+    "name": "apply_twirl_gravity",
+    "ram_addr": "0x802564E0",
+    "rom_addr": "0x0000000114E0",
+    "length_bytes": 1604,
+    "length_hex": "0x644"
+  },
+  {
+    "name": "perform_air_step",
+    "ram_addr": "0x80256B24",
+    "rom_addr": "0x000000011B24",
+    "length_bytes": 436,
+    "length_hex": "0x1B4"
+  },
+  {
+    "name": "set_vel_from_pitch_and_yaw",
+    "ram_addr": "0x80256CD8",
+    "rom_addr": "0x000000011CD8",
+    "length_bytes": null,
+    "length_hex": null
+  },
+  {
+    "name": "f32_find_wall_collision",
+    "ram_addr": "0x80380DE8",
+    "rom_addr": "0x00000013BDE8",
+    "length_bytes": 164,
+    "length_hex": "0xA4"
+  },
+  {
+    "name": "find_wall_collisions",
+    "ram_addr": "0x80380E8C",
+    "rom_addr": "0x00000013BE8C",
+    "length_bytes": 984,
+    "length_hex": "0x3D8"
+  },
+  {
+    "name": "find_ceil",
+    "ram_addr": "0x80381264",
+    "rom_addr": "0x00000013C264",
+    "length_bytes": 524,
+    "length_hex": "0x20C"
+  },
+  {
+    "name": "unused_obj_find_floor_height",
+    "ram_addr": "0x80381470",
+    "rom_addr": "0x00000013C470",
+    "length_bytes": 72,
+    "length_hex": "0x48"
+  },
+  {
+    "name": "find_floor_height_and_data",
+    "ram_addr": "0x803814B8",
+    "rom_addr": "0x00000013C4B8",
+    "length_bytes": 732,
+    "length_hex": "0x2DC"
+  },
+  {
+    "name": "find_floor_height",
+    "ram_addr": "0x80381794",
+    "rom_addr": "0x00000013C794",
+    "length_bytes": 76,
+    "length_hex": "0x4C"
+  },
+  {
+    "name": "unused_find_dynamic_floor",
+    "ram_addr": "0x803817E0",
+    "rom_addr": "0x00000013C7E0",
+    "length_bytes": 288,
+    "length_hex": "0x120"
+  },
+  {
+    "name": "find_floor",
+    "ram_addr": "0x80381900",
+    "rom_addr": "0x00000013C900",
+    "length_bytes": 672,
+    "length_hex": "0x2A0"
+  },
+  {
+    "name": "find_water_level",
+    "ram_addr": "0x80381BA0",
+    "rom_addr": "0x00000013CBA0",
+    "length_bytes": 412,
+    "length_hex": "0x19C"
+  },
+  {
+    "name": "find_poison_gas_level",
+    "ram_addr": "0x80381D3C",
+    "rom_addr": "0x00000013CD3C",
+    "length_bytes": 460,
+    "length_hex": "0x1CC"
+  },
+  {
+    "name": "debug_surface_list_info",
+    "ram_addr": "0x80381F08",
+    "rom_addr": "0x00000013CF08",
+    "length_bytes": 908,
+    "length_hex": "0x38C"
+  },
+  {
+    "name": "unused_resolve_floor_or_ceil_collisions",
+    "ram_addr": "0x80382294",
+    "rom_addr": "0x00000013D294",
+    "length_bytes": 508,
+    "length_hex": "0x1FC"
+  },
+  {
+    "name": "alloc_surface_node",
+    "ram_addr": "0x80382490",
+    "rom_addr": "0x00000013D490",
+    "length_bytes": 104,
+    "length_hex": "0x68"
+  },
+  {
+    "name": "alloc_surface",
+    "ram_addr": "0x803824F8",
+    "rom_addr": "0x00000013D4F8",
+    "length_bytes": 152,
+    "length_hex": "0x98"
+  },
+  {
+    "name": "clear_spatial_partition",
+    "ram_addr": "0x80382590",
+    "rom_addr": "0x00000013D590",
+    "length_bytes": 64,
+    "length_hex": "0x40"
+  },
+  {
+    "name": "clear_static_surfaces",
+    "ram_addr": "0x803825D0",
+    "rom_addr": "0x00000013D5D0",
+    "length_bytes": 44,
+    "length_hex": "0x2C"
+  },
+  {
+    "name": "add_surface_to_cell",
+    "ram_addr": "0x803825FC",
+    "rom_addr": "0x00000013D5FC",
+    "length_bytes": 576,
+    "length_hex": "0x240"
+  },
+  {
+    "name": "min_3",
+    "ram_addr": "0x8038283C",
+    "rom_addr": "0x00000013D83C",
+    "length_bytes": 96,
+    "length_hex": "0x60"
+  },
+  {
+    "name": "max_3",
+    "ram_addr": "0x8038289C",
+    "rom_addr": "0x00000013D89C",
+    "length_bytes": 96,
+    "length_hex": "0x60"
+  },
+  {
+    "name": "lower_cell_index",
+    "ram_addr": "0x803828FC",
+    "rom_addr": "0x00000013D8FC",
+    "length_bytes": 148,
+    "length_hex": "0x94"
+  },
+  {
+    "name": "upper_cell_index",
+    "ram_addr": "0x80382990",
+    "rom_addr": "0x00000013D990",
+    "length_bytes": 156,
+    "length_hex": "0x9C"
+  },
+  {
+    "name": "add_surface",
+    "ram_addr": "0x80382A2C",
+    "rom_addr": "0x00000013DA2C",
+    "length_bytes": 336,
+    "length_hex": "0x150"
+  },
+  {
+    "name": "read_surface_data",
+    "ram_addr": "0x80382B7C",
+    "rom_addr": "0x00000013DB7C",
+    "length_bytes": 1032,
+    "length_hex": "0x408"
+  },
+  {
+    "name": "surface_has_force",
+    "ram_addr": "0x80382F84",
+    "rom_addr": "0x00000013DF84",
+    "length_bytes": 104,
+    "length_hex": "0x68"
+  },
+  {
+    "name": "surf_has_no_cam_collision",
+    "ram_addr": "0x80382FEC",
+    "rom_addr": "0x00000013DFEC",
+    "length_bytes": 124,
+    "length_hex": "0x7C"
+  },
+  {
+    "name": "load_static_surfaces",
+    "ram_addr": "0x80383068",
+    "rom_addr": "0x00000013E068",
+    "length_bytes": 360,
+    "length_hex": "0x168"
+  },
+  {
+    "name": "read_vertex_data",
+    "ram_addr": "0x803831D0",
+    "rom_addr": "0x00000013E1D0",
+    "length_bytes": 88,
+    "length_hex": "0x58"
+  },
+  {
+    "name": "load_environmental_regions",
+    "ram_addr": "0x80383228",
+    "rom_addr": "0x00000013E228",
+    "length_bytes": 280,
+    "length_hex": "0x118"
+  },
+  {
+    "name": "alloc_surface_pools",
+    "ram_addr": "0x80383340",
+    "rom_addr": "0x00000013E340",
+    "length_bytes": 120,
+    "length_hex": "0x78"
+  },
+  {
+    "name": "load_area_terrain",
+    "ram_addr": "0x803833B8",
+    "rom_addr": "0x00000013E3B8",
+    "length_bytes": 492,
+    "length_hex": "0x1EC"
+  },
+  {
+    "name": "clear_dynamic_surfaces",
+    "ram_addr": "0x803835A4",
+    "rom_addr": "0x00000013E5A4",
+    "length_bytes": 112,
+    "length_hex": "0x70"
+  },
+  {
+    "name": "transform_object_vertices",
+    "ram_addr": "0x80383614",
+    "rom_addr": "0x00000013E614",
+    "length_bytes": 532,
+    "length_hex": "0x214"
+  },
+  {
+    "name": "load_object_surfaces",
+    "ram_addr": "0x80383828",
+    "rom_addr": "0x00000013E828",
+    "length_bytes": 420,
+    "length_hex": "0x1A4"
+  },
+  {
+    "name": "load_object_collision_model",
+    "ram_addr": "0x803839CC",
+    "rom_addr": "0x00000013E9CC",
+    "length_bytes": null,
+    "length_hex": null
+  }
+]

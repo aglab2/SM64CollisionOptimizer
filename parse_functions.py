@@ -5,6 +5,7 @@ Assumes all functions are contiguous — the end of one function is the start
 of the next. The last function's length cannot be determined this way.
 """
 
+import json
 import sys
 from dataclasses import dataclass
 
@@ -91,8 +92,41 @@ def compute_lengths(functions: list[Function]) -> list[tuple[str, int, int | str
     return results
 
 
+def build_json_data(functions: list[Function]) -> list[dict]:
+    """Build a JSON-serializable list of function dicts."""
+    results = compute_lengths(functions)
+    output = []
+    for name, addr, length in results:
+        entry: dict = {
+            "name": name,
+            "ram_addr": f"0x{addr:X}",
+            "rom_addr": ram_to_rom(addr) or "unmapped",
+        }
+        if isinstance(length, int):
+            entry["length_bytes"] = length
+            entry["length_hex"] = f"0x{length:X}"
+        elif length is None:
+            entry["length_bytes"] = None  # last function or region boundary
+            entry["length_hex"] = None
+        else:
+            # Gap marker — skip these entirely from JSON
+            continue
+        output.append(entry)
+    return output
+
+
 def main():
-    filepath = sys.argv[1] if len(sys.argv) > 1 else "ram_addresses.txt"
+    args = sys.argv[1:]
+    filepath = args[0] if args else "ram_addresses.txt"
+    save_path = None
+    i = 1
+    while i < len(args):
+        if args[i] == "--save" and i + 1 < len(args):
+            save_path = args[i + 1]
+            i += 2
+        else:
+            i += 1
+
     functions = parse_addresses(filepath)
 
     if not functions:
@@ -131,6 +165,13 @@ def main():
     else:
         print("Note: addresses are not in strict ascending order — multiple blocks detected.")
     print(f"Number of functions:   {len(functions)}")
+
+    # Save JSON if requested
+    if save_path:
+        json_data = build_json_data(functions)
+        with open(save_path, "w") as f:
+            json.dump(json_data, f, indent=2)
+        print(f"\nSaved {len(json_data)} functions to {save_path}")
 
 
 if __name__ == "__main__":

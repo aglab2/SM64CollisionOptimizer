@@ -9,7 +9,11 @@ CPP_FILES = \
 	add_surface \
 	read_surface_data \
 	surface_has_force \
-	surf_has_no_cam_collision
+	surf_has_no_cam_collision \
+	load_static_surfaces \
+	load_environmental_regions \
+	load_area_terrain \
+	clear_dynamic_surfaces
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

@@ -23,11 +23,12 @@ def main():
         sys.exit(1)
 
     ram_addr = func["ram_addr"]
+    fn_name = func["name"]
 
     with open(script_dir / "c/ldscript.tmpl", "r") as f:
         content = f.read()
 
-    patched = content.replace("%%LINKER%%", ram_addr)
+    patched = content.replace("%%LINKER%%", ram_addr).replace("%%START%%", fn_name)
 
     with open(sys.argv[1], "w") as f:
         f.write(patched)

@@ -3,7 +3,10 @@ OBJ_DIR = obj
 BIN_DIR = bin
 
 # Alter these 4 variables according to your need
-CPP_FILES = clear_spatial_partition
+CPP_FILES = \
+	clear_spatial_partition \
+	clear_static_surfaces \
+	add_surface_to_cell
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld
@@ -16,12 +19,12 @@ CC = mips-n64-gcc
 AR = mips-n64-ar
 LD = mips-n64-ld
 CFLAGS = -Wall -Wextra -Wno-trigraphs -Wno-missing-braces -Wno-overflow \
--Os -ffast-math -ftrapping-math -fno-associative-math -G0 \
--I $(INCLUDE_PATH) -I $(INCLUDE_PATH)/libc \
--mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks \
--fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -ffreestanding -fwrapv \
--DTARGET_N64 -D_LANGUAGE_C -DVERSION_US=1 -D_FINALROM=1 -DNDEBUG=1 \
--nostdinc
+	-Os -ffast-math -ftrapping-math -fno-associative-math -G0 \
+	-I $(INCLUDE_PATH) -I $(INCLUDE_PATH)/libc \
+	-mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks \
+	-fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -ffreestanding -fwrapv \
+	-DTARGET_N64 -D_LANGUAGE_C -DVERSION_US=1 -D_FINALROM=1 -DNDEBUG=1 \
+	-nostdinc
 PYTHON = python3
 
 all: $(BIN_FILES)
@@ -45,3 +48,4 @@ clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
 
 .PHONY: all clean
+.SECONDARY:

@@ -76,3 +76,6 @@ STATIC_ASSERT(((EXTENDED_BOUNDS_MODE >= 0) && (EXTENDED_BOUNDS_MODE <= 3)), "You
  * Use this to convert game units to cell coordinates.
  */
 #define GET_CELL_COORD(p)   ((((s32)(p) + LEVEL_BOUNDARY_MAX) / CELL_SIZE) & (NUM_CELLS - 1))
+
+#define NORMAL_FLOOR_THRESHOLD 0.01f
+#define NORMAL_CEIL_THRESHOLD -NORMAL_FLOOR_THRESHOLD

@@ -2,7 +2,7 @@
 
 #include "config_world.h"
 
-void _start(SpatialPartitionCell *cells) {
+void clear_spatial_partition(SpatialPartitionCell *cells) {
     register s32 i = NUM_CELLS * NUM_CELLS;
 
     while (i--) {

@@ -147,3 +147,14 @@ static inline __attribute__((always_inline)) void min_max_3s(s16 a, s16 b, s16 c
     linear_mtxf_mul_vec3((mtx), (dstV), (srcV));              \
     vec3_add((dstV), (mtx)[3]);                               \
 }
+
+// Absolute value
+#define ABS(x) ({         \
+    __auto_type _x = (x); \
+    _x > 0 ? _x : -_x; })
+#define absi ABS
+#define abss ABS
+#define absf ABS
+
+#define NEAR_ZERO   0.0001f
+#define FLT_IS_NONZERO(x) (absf(x) > NEAR_ZERO)

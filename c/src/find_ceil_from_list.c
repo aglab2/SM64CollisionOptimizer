@@ -1,4 +1,13 @@
 
+#include "types.h"
+#include "math_ex.h"
+#include "surface_terrains.h"
+#include "engine/surface_load.h"
+#include "game/room.h"
+#include "config_world.h"
+
+typedef s16 SurfaceType;
+
 static inline void add_ceil_margin(s32 *x, s32 *z, Vec3s target1, Vec3s target2, f32 margin) {
     register f32 diff_x = target1[0] - *x + target2[0] - *x;
     register f32 diff_z = target1[2] - *z + target2[2] - *z;
@@ -36,7 +45,7 @@ static inline s32 check_within_ceil_triangle_bounds(s32 x, s32 z, struct Surface
 /**
  * Iterate through the list of ceilings and find the first ceiling over a given point.
  */
-static struct Surface *find_ceil_from_list(struct SurfaceNode *surfaceNode, s32 x, s32 y, s32 z, f32 *pheight) {
+struct Surface *find_ceil_from_list(struct SurfaceNode *surfaceNode, s32 x, s32 y, s32 z, f32 *pheight) {
     register struct Surface *surf, *ceil = NULL;
     register f32 height;
     SurfaceType type = SURFACE_DEFAULT;

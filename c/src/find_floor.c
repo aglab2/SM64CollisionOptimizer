@@ -1,11 +1,18 @@
 
+#include "types.h"
+#include "engine/surface_load.h"
+#include "config_world.h"
+
+struct Surface *find_floor_from_list(struct SurfaceNode *surfaceNode, s32 x, s32 y, s32 z, f32 *pheight);
+
+// External globals
+extern s32 gFindFloorIncludeSurfaceIntangible;
+extern s32 gNumFindFloorMisses;
+
 /**
  * Find the highest floor under a given position and return the height.
  */
 f32 find_floor(f32 xPos, f32 yPos, f32 zPos, struct Surface **pfloor) {
-    PUPPYPRINT_ADD_COUNTER(gPuppyCallCounter.collision_floor);
-    PUPPYPRINT_GET_SNAPSHOT();
-
     f32 height        = FLOOR_LOWER_LIMIT;
     f32 dynamicHeight = FLOOR_LOWER_LIMIT;
 
@@ -19,7 +26,6 @@ f32 find_floor(f32 xPos, f32 yPos, f32 zPos, struct Surface **pfloor) {
     *pfloor = NULL;
 
     if (is_outside_level_bounds(x, z)) {
-        profiler_collision_update(first);
         return height;
     }
     // Each level is split into cells to limit load, find the appropriate cell.
@@ -34,7 +40,7 @@ f32 find_floor(f32 xPos, f32 yPos, f32 zPos, struct Surface **pfloor) {
 
     if (includeDynamic) {
         // Check for surfaces belonging to objects.
-        surfaceList = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS];
+        surfaceList = &gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS];
         dynamicFloor = find_floor_from_list(surfaceList, x, y, z, &dynamicHeight);
 
         // In the next check, only check for floors higher than the previous check.
@@ -42,7 +48,7 @@ f32 find_floor(f32 xPos, f32 yPos, f32 zPos, struct Surface **pfloor) {
     }
 
     // Check for surfaces that are a part of level geometry.
-    surfaceList = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS];
+    surfaceList = &gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS];
     floor = find_floor_from_list(surfaceList, x, y, z, &height);
 
     // Use the higher floor.
@@ -60,11 +66,5 @@ f32 find_floor(f32 xPos, f32 yPos, f32 zPos, struct Surface **pfloor) {
 
     // Return the floor.
     *pfloor = floor;
-#ifdef VANILLA_DEBUG
-    // Increment the debug tracker.
-    gNumCalls.floor++;
-#endif
-
-    profiler_collision_update(first);
     return height;
 }

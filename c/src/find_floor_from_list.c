@@ -1,3 +1,11 @@
+#include "types.h"
+#include "surface_terrains.h"
+#include "engine/surface_load.h"
+#include "game/room.h"
+#include "config_world.h"
+
+typedef s16 SurfaceType;
+
 static s32 check_within_floor_triangle_bounds(s32 x, s32 z, struct Surface *surf) {
     Vec3i vx, vz;
     vx[0] = surf->vertex1[0];

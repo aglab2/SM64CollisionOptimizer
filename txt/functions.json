@@ -72,7 +72,13 @@
     "name": "find_wall_collisions",
     "ram_addr": "0x80380E8C",
     "rom_addr": "0x0000000FDC0C",
-    "length": 984
+    "length": 428
+  },
+  {
+    "name": "find_ceil_from_list",
+    "ram_addr": "0x80381038",
+    "rom_addr": "0x0000000FDDB8",
+    "length": 556
   },
   {
     "name": "find_ceil",
@@ -90,7 +96,13 @@
     "name": "find_floor_height_and_data",
     "ram_addr": "0x803814B8",
     "rom_addr": "0x0000000FE238",
-    "length": 732
+    "length": 180
+  },
+  {
+    "name": "find_floor_from_list",
+    "ram_addr": "0x8038156C",
+    "rom_addr": "0x0000000FE2EC",
+    "length": 552
   },
   {
     "name": "find_floor_height",
@@ -120,7 +132,13 @@
     "name": "find_poison_gas_level",
     "ram_addr": "0x80381D3C",
     "rom_addr": "0x0000000FEABC",
-    "length": 460
+    "length": 396
+  },
+  {
+    "name": "surface_list_length",
+    "ram_addr": "0x80381EC8",
+    "rom_addr": "0x0000000FEC48",
+    "length": 64
   },
   {
     "name": "debug_surface_list_info",
@@ -267,6 +285,6 @@
     "name": "load_object_collision_model",
     "ram_addr": "0x803839CC",
     "rom_addr": "0x00000010074C",
-    "length": null
+    "length": 420
   }
 ]

@@ -7,7 +7,6 @@
 #include "game/level_update.h"
 #include "object_constants.h"
 #include "sm64.h"
-#include "game/object_helpers2.h"
 #include "game/room.h"
 
 #define o gCurrentObject
@@ -29,9 +28,6 @@ static s32 check_wall_vw(f32 d00, f32 d01, f32 d11, f32 d20, f32 d21, f32 mult) 
 
     return FALSE;
 }
-
-#define NEAR_ZERO   0.0001f
-#define FLT_IS_NONZERO(x) (absf(x) > NEAR_ZERO)
 
 static s32 check_wall_edge(Vec3f vert, Vec3f v2, f32 *d00, f32 *d01, f32 *invDenom, f32 *offset, f32 margin_radius) {
     if (FLT_IS_NONZERO(vert[1])) {

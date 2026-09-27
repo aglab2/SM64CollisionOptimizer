@@ -8,3 +8,6 @@ load_environmental_regions = 0x80383228;
 transform_object_vertices = 0x0000000080383614;
 load_object_surfaces = 0x0000000080383828;
 find_wall_collisions_from_list = 0x0000000080380690;
+find_ceil_from_list = 0x0000000080381138;
+find_floor_from_list = 0x8038156C;
+find_floor = 0x80381900;

@@ -19,7 +19,11 @@ CPP_FILES = \
 	load_object_collision_model \
 	find_wall_collisions_from_list \
 	f32_find_wall_collision \
-	find_wall_collisions
+	find_wall_collisions \
+	find_ceil_from_list \
+	find_ceil \
+	find_floor \
+	find_floor_from_list
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

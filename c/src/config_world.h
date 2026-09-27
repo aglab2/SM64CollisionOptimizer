@@ -79,3 +79,19 @@ STATIC_ASSERT(((EXTENDED_BOUNDS_MODE >= 0) && (EXTENDED_BOUNDS_MODE <= 3)), "You
 
 #define NORMAL_FLOOR_THRESHOLD 0.01f
 #define NORMAL_CEIL_THRESHOLD -NORMAL_FLOOR_THRESHOLD
+
+// The y coord is moved upward by this amount when finding floors.
+// Vanilla value is 78.
+#define FIND_FLOOR_BUFFER 78
+
+#define CELL_HEIGHT_LIMIT            20000
+#define FLOOR_LOWER_LIMIT           -11000
+#define FLOOR_LOWER_LIMIT_MISC      (FLOOR_LOWER_LIMIT + 1000)
+
+#define is_outside_level_bounds(xPos, zPos) \
+    (((xPos) <= -LEVEL_BOUNDARY_MAX) ||     \
+     ((xPos) >=  LEVEL_BOUNDARY_MAX) ||     \
+     ((zPos) <= -LEVEL_BOUNDARY_MAX) ||     \
+     ((zPos) >=  LEVEL_BOUNDARY_MAX))
+
+#define get_surface_height_at_location(xPos, zPos, surf) (-(((xPos) * (surf)->normal.x) + ((zPos) * (surf)->normal.z) + (surf)->originOffset) / (surf)->normal.y)

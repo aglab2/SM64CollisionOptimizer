@@ -7,3 +7,4 @@ load_static_surfaces = 0x0000000080383068;
 load_environmental_regions = 0x80383228;
 transform_object_vertices = 0x0000000080383614;
 load_object_surfaces = 0x0000000080383828;
+find_wall_collisions_from_list = 0x0000000080380690;

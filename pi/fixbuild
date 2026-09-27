@@ -1,0 +1,2 @@
+Check if project builds. Fix build errors by adding missing defines/externs/includes.
+If you extern a function/symbol, make sure it is available in either `c/locals.ld` or `c/sm64-api/ld/symbols.ld`.

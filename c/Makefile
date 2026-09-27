@@ -17,7 +17,9 @@ CPP_FILES = \
 	transform_object_vertices \
 	load_object_surfaces \
 	load_object_collision_model \
-	find_wall_collisions_from_list
+	find_wall_collisions_from_list \
+	f32_find_wall_collision \
+	find_wall_collisions
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

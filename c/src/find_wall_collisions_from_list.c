@@ -10,6 +10,8 @@
 #include "game/object_helpers2.h"
 #include "game/room.h"
 
+#define o gCurrentObject
+
 #define TerrainData s16
 
 #define MAX_REFERENCED_WALLS 4
@@ -56,7 +58,7 @@ struct Find1Result
     int cornerThresholded;
 };
 
-static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceNode *surfaceNode, f32 radius, const Vec3f pos, struct WallCollisionData *data, s32 use_edge_collision, struct Object *o)
+static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceNode *surfaceNode, f32 radius, const Vec3f pos, struct WallCollisionData *data)
 {
     const f32 corner_threshold = -0.9f;
     struct Surface *surf;
@@ -130,10 +132,6 @@ static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceN
                 continue;
             }
 
-            if (!use_edge_collision) {
-                continue;
-            }
-
             // Edge 1-2
             f32 invDenom;
             if (check_wall_edge(v0, v2, &d00, &d01, &invDenom, &offset, margin_radius)) {
@@ -186,13 +184,13 @@ static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceN
  * Iterate through the list of walls until all walls are checked and
  * have given their wall push.
  */
-s32 find_wall_collisions_from_list(struct SurfaceNode *surfaceNode, struct WallCollisionData *data, s32 use_edge_collision, struct Object *o) {
+s32 find_wall_collisions_from_list(struct SurfaceNode *surfaceNode, struct WallCollisionData *data) {
     Vec3f pos = { data->x, data->y + data->offsetY, data->z };
 
     int numCols = 0;
     for (int i = 0; i < MAX_REFERENCED_WALLS; i++)
     {
-        struct Find1Result result = find_wall_collisions_from_list1(surfaceNode, data->radius, pos, data, use_edge_collision, o);
+        struct Find1Result result = find_wall_collisions_from_list1(surfaceNode, data->radius, pos, data);
         if (!result.surf)
             break;
 

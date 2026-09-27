@@ -1,11 +1,17 @@
 #include "types.h"
 
 #include "game/object_list_processor.h"
+#include "game/object_helpers.h"
 #include "engine/graph_node.h"
 
 #include "object_constants.h"
 #include "object_fields.h"
 #include "surface_terrains.h"
+
+#define TerrainData s16
+
+extern void transform_object_vertices(TerrainData **data, TerrainData *vertexData);
+extern void load_object_surfaces(TerrainData **data, TerrainData *vertexData, struct Object *o);
 
 void load_object_collision_model(void) {
     UNUSED u8 filler[4];
@@ -35,7 +41,7 @@ void load_object_collision_model(void) {
 
         // TERRAIN_LOAD_CONTINUE acts as an "end" to the terrain data.
         while (*collisionData != TERRAIN_LOAD_CONTINUE) {
-            load_object_surfaces(&collisionData, vertexData);
+            load_object_surfaces(&collisionData, vertexData, gCurrentObject);
         }
     }
 

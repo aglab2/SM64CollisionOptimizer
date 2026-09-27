@@ -1,14 +1,23 @@
 #include "types.h"
+#include "surface_terrains.h"
+#include "game/memory.h"
+#include "behavior_data.h"
 
 #define TerrainData s16
+#define RoomData s8
 
-void load_object_surfaces(TerrainData **data, TerrainData *vertexData) {
+extern s32 surface_has_force(s16 surfaceType);
+extern s32 surf_has_no_cam_collision(s16 surfaceType);
+extern struct Surface *read_surface_data(s16 *vertexData, s16 **vertexIndices);
+extern void add_surface(struct Surface *surface, s32 dynamic);
+
+void load_object_surfaces(TerrainData **data, TerrainData *vertexData, struct Object *o) {
     s32 i;
 
     s32 surfaceType = *(*data)++;
     s32 numSurfaces = *(*data)++;
 
-    TerrainData hasForce = surface_has_force(surfaceType);
+    s32 hasForce = surface_has_force(surfaceType);
 
     s32 flags = surf_has_no_cam_collision(surfaceType) | SURFACE_FLAG_DYNAMIC;
 
@@ -31,7 +40,7 @@ void load_object_surfaces(TerrainData **data, TerrainData *vertexData) {
 
             surface->flags |= flags;
             surface->room = room;
-            add_surface(surface, dynamic);
+            add_surface(surface, TRUE);
         }
 
         if (hasForce) {

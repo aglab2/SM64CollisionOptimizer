@@ -59,6 +59,15 @@
 #define vec3i_sum vec3_sum
 #define vec3s_sum vec3_sum
 
+#define vec3_diff(dst, src1, src2) {        \
+    __auto_type _x = (src1)[0] - (src2)[0]; \
+    __auto_type _y = (src1)[1] - (src2)[1]; \
+    __auto_type _z = (src1)[2] - (src2)[2]; \
+    (dst)[0] = _x;                          \
+    (dst)[1] = _y;                          \
+    (dst)[2] = _z;                          \
+}
+
 // Add the vector 'src' to vector 'dst'
 #define vec2_add(dst, src) vec2_sum((dst), (dst), (src))
 #define vec3_add(dst, src) vec3_sum((dst), (dst), (src))

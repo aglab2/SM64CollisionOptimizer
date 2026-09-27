@@ -1,4 +1,18 @@
 #include "types.h"
+#include "math_ex.h"
+#include "surface_terrains.h"
+#include "engine/surface_collision.h"
+#include "engine/surface_load.h"
+#include "game/object_list_processor.h"
+#include "game/level_update.h"
+#include "object_constants.h"
+#include "sm64.h"
+#include "game/object_helpers2.h"
+#include "game/room.h"
+
+#define TerrainData s16
+
+#define MAX_REFERENCED_WALLS 4
 
 static s32 check_wall_vw(f32 d00, f32 d01, f32 d11, f32 d20, f32 d21, f32 mult) {
     f32 v = ((d11 * d20) - (d01 * d21));
@@ -42,9 +56,8 @@ struct Find1Result
     int cornerThresholded;
 };
 
-static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceNode *surfaceNode, f32 radius, const Vec3f pos, struct WallCollisionData *data)
+static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceNode *surfaceNode, f32 radius, const Vec3f pos, struct WallCollisionData *data, s32 use_edge_collision, struct Object *o)
 {
-    int use_edge_collision = gCurrCourseNum != COURSE_JRB;
     const f32 corner_threshold = -0.9f;
     struct Surface *surf;
     f32 offset;
@@ -76,7 +89,7 @@ static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceN
         if (pos[1] < surf->lowerY || pos[1] > surf->upperY) continue;
 
         // Determine if checking for the camera or not.
-        if (gCollisionFlags & COLLISION_FLAG_CAMERA) {
+        if (gCheckingSurfaceCollisionsForCamera) {
             if (surf->flags & SURFACE_FLAG_NO_CAM_COLLISION) continue;
         } else {
             // Ignore camera only surfaces.
@@ -173,13 +186,13 @@ static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceN
  * Iterate through the list of walls until all walls are checked and
  * have given their wall push.
  */
-static s32 find_wall_collisions_from_list(struct SurfaceNode *surfaceNode, struct WallCollisionData *data) {
+s32 find_wall_collisions_from_list(struct SurfaceNode *surfaceNode, struct WallCollisionData *data, s32 use_edge_collision, struct Object *o) {
     Vec3f pos = { data->x, data->y + data->offsetY, data->z };
 
     int numCols = 0;
     for (int i = 0; i < MAX_REFERENCED_WALLS; i++)
     {
-        struct Find1Result result = find_wall_collisions_from_list1(surfaceNode, data->radius, pos, data);
+        struct Find1Result result = find_wall_collisions_from_list1(surfaceNode, data->radius, pos, data, use_edge_collision, o);
         if (!result.surf)
             break;
 

@@ -16,7 +16,8 @@ CPP_FILES = \
 	clear_dynamic_surfaces \
 	transform_object_vertices \
 	load_object_surfaces \
-	load_object_collision_model
+	load_object_collision_model \
+	find_wall_collisions_from_list
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

@@ -5,8 +5,8 @@ import json
 
 
 ROM_REGIONS = [
-    (0x80246000, 0x00001000),
     (0x80378800, 0x000f5580),
+    (0x80246000, 0x00001000),
 ]
 
 
@@ -37,14 +37,11 @@ def main():
         if i < len(functions) - 1:
             delta = functions[i + 1][1] - addr
             if delta > 0:
-                entry["length_bytes"] = delta
-                entry["length_hex"] = f"0x{delta:X}"
+                entry["length"] = delta
             else:
-                entry["length_bytes"] = None
-                entry["length_hex"] = None
+                entry["length"] = None
         else:
-            entry["length_bytes"] = None
-            entry["length_hex"] = None
+            entry["length"] = None
         result.append(entry)
 
     with open("functions.json", "w") as f:

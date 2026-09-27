@@ -2,6 +2,16 @@
 
 #include "config_world.h"
 
+extern s32 gSurfaceNodesAllocated;
+
+static inline struct SurfaceNode *alloc_surface_node(void) {
+    struct SurfaceNode *node = &sSurfaceNodePool[gSurfaceNodesAllocated];
+    gSurfaceNodesAllocated++;
+
+    node->next = NULL;
+    return node;
+}
+
 void add_surface_to_cell(s32 dynamic, s32 cellX, s32 cellZ, struct Surface *surface) {
     struct SurfaceNode **list;
     s32 priority;
@@ -24,11 +34,11 @@ void add_surface_to_cell(s32 dynamic, s32 cellX, s32 cellZ, struct Surface *surf
 
     s32 surfacePriority = sortVal * sortDir;
 
-    struct SurfaceNode *newNode = alloc_surface_node(dynamic);
+    struct SurfaceNode *newNode = alloc_surface_node();
     newNode->surface = surface;
 
     if (dynamic) {
-        list = &gDynamicSurfacePartition[cellZ][cellX][listIndex];
+        list = &gDynamicSurfacePartition[cellZ][cellX][listIndex].next;
 #if notyet
         if (sNumCellsUsed >= sizeof(sCellsUsed) / sizeof(struct CellCoords)) {
             sClearAllCells = TRUE;
@@ -42,7 +52,7 @@ void add_surface_to_cell(s32 dynamic, s32 cellX, s32 cellZ, struct Surface *surf
         }
 #endif
     } else {
-        list = &gStaticSurfacePartition[cellZ][cellX][listIndex];
+        list = &gStaticSurfacePartition[cellZ][cellX][listIndex].next;
     }
 
     if (*list == NULL) {

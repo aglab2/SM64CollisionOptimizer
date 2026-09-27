@@ -6,7 +6,11 @@ BIN_DIR = bin
 CPP_FILES = \
 	clear_spatial_partition \
 	clear_static_surfaces \
-	add_surface_to_cell
+	add_surface_to_cell \
+	min_3 \
+	max_3 \
+	lower_cell_index \
+	upper_cell_index
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

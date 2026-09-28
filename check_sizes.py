@@ -41,7 +41,7 @@ def build_contiguous_layout(functions, reloc_map):
             "length": length,
         })
     # Sort by relocated address
-    entries.sort(key=lambda e: e["relocated_addr"])
+    entries.sort(key=lambda e: e["orig_addr"])
     return entries
 
 
@@ -68,6 +68,7 @@ def main():
     for entry in layout:
         name = entry["name"]
         exp_len = entry["length"]
+        reloc = entry["relocated_addr"]
 
         if name not in has_bin:
             missing_list.append((name, exp_len))
@@ -77,19 +78,23 @@ def main():
         # Find this entry's position in the layout
         my_idx = None
         for i, e in enumerate(layout):
-            if e["name"] == name:
+            if e["orig_addr"] == reloc:
                 my_idx = i
                 break
 
-        limit = exp_len
+        assert my_idx, f"Failed to find sym for name {name}"
+
+        start_entry = layout[my_idx]
+        limit = start_entry["length"]
         for i in range(my_idx + 1, len(layout)):
             next_entry = layout[i]
-            # Contiguous check: next entry must start exactly where current span ends
-            if next_entry["relocated_addr"] != entry["relocated_addr"] + (limit - exp_len):
-                # Not contiguous (gap or overlap) - stop
+            if next_entry["orig_addr"] != start_entry["orig_addr"] + limit:
+                print(f"Non contig {start_entry["name"]} -> {next_entry["name"]} because {next_entry["orig_addr"]:x} {start_entry["orig_addr"] + limit:x}")
                 break
+
             if next_entry["name"] in has_bin:
                 break  # Has a bin file - stop here
+
             # Missing function - span into it
             limit += next_entry["length"]
 

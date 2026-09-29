@@ -41,6 +41,7 @@ CFLAGS = -Wall -Wextra -Wno-trigraphs -Wno-missing-braces -Wno-overflow \
 	-mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks \
 	-fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -ffreestanding -fwrapv \
 	-DTARGET_N64 -D_LANGUAGE_C -DVERSION_US=1 -D_FINALROM=1 -DNDEBUG=1 \
+	-ffunction-sections -fdata-sections \
 	-nostdinc
 PYTHON = python3
 

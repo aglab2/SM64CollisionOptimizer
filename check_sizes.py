@@ -61,7 +61,8 @@ def main():
             has_bin.add(entry["name"])
 
     errors = []
-    missing_list = []
+    spanning_groups = []  # (parent_name, [(missing_name, missing_len), ...])
+    orphan_missing = []   # missing functions not contiguous with any parent
     extra = []
     ok_count = 0
 
@@ -71,7 +72,7 @@ def main():
         reloc = entry["relocated_addr"]
 
         if name not in has_bin:
-            missing_list.append((name, exp_len))
+            orphan_missing.append((name, exp_len))
             continue
 
         # Calculate effective limit: own length + lengths of contiguous following MISSING functions
@@ -86,6 +87,7 @@ def main():
 
         start_entry = layout[my_idx]
         limit = start_entry["length"]
+        span_group = []
         for i in range(my_idx + 1, len(layout)):
             next_entry = layout[i]
             if next_entry["orig_addr"] != start_entry["orig_addr"] + limit:
@@ -96,7 +98,10 @@ def main():
                 break  # Has a bin file - stop here
 
             # Missing function - span into it
+            span_group.append((next_entry["name"], next_entry["length"]))
             limit += next_entry["length"]
+        if span_group:
+            spanning_groups.append((start_entry["name"], span_group))
 
         actual_len = os.path.getsize(os.path.join(BIN_DIR, f"{name}.bin"))
         if actual_len > limit:
@@ -114,9 +119,17 @@ def main():
             overflow = actual - expected_len
             pct = (overflow / expected_len * 100) if expected_len else float("inf")
             print(f"OVERFLOW: {name}.bin is {actual} bytes, exceeds limit of {expected_len} by {overflow} ({pct:.1f}%)")
-    if missing_list:
-        for name, exp_len in missing_list:
+    all_missing = []
+    if spanning_groups:
+        for parent_name, group in spanning_groups:
+            total_len = sum(length for _, length in group)
+            func_names = ", ".join(name for name, _ in group)
+            print(f"MISSING: {parent_name}.bin spans into missing functions ({func_names}), total expected {total_len} bytes")
+            all_missing.extend(group)
+    if orphan_missing:
+        for name, exp_len in orphan_missing:
             print(f"MISSING: {name}.bin (expected {exp_len} bytes)")
+            all_missing.append((name, exp_len))
     if extra:
         for name in extra:
             print(f"EXTRA: {name}.bin not in functions.json")
@@ -132,8 +145,8 @@ def main():
             parts.append(f"{len(extra)} extra")
         print(f"\n{' '.join(parts)}")
         sys.exit(1)
-    elif missing_list:
-        print(f"\n{len(missing_list)} missing (not fatal)")
+    elif all_missing:
+        print(f"\n{len(all_missing)} missing (not fatal)")
         print("\nAll checks passed.")
     else:
         print("\nAll checks passed.")

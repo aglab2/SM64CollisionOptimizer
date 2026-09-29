@@ -7,7 +7,7 @@ SECTIONS
 {
   .sm64 %%LINKER%% : 
   {
-    *(.data._start)
+    *(.text.%%START%%)
     *(.text*)
     *(.rodata*)
     *(.data*)

@@ -9,6 +9,8 @@
 #include "sm64.h"
 #include "game/room.h"
 
+#include "config_world.h"
+
 #define o gCurrentObject
 
 #define TerrainData s16
@@ -38,7 +40,7 @@ static s32 check_wall_edge(Vec3f vert, Vec3f v2, f32 *d00, f32 *d01, f32 *invDen
 
         *d00 = ((vert[0] * v) - v2[0]);
         *d01 = ((vert[2] * v) - v2[2]);
-        *invDenom = sqrtf(sqr(*d00) + sqr(*d01));
+        *invDenom = __builtin_sqrtf(sqr(*d00) + sqr(*d01));
         *offset = (*invDenom - margin_radius);
 
         return (*offset > 0.0f);
@@ -52,9 +54,16 @@ struct Find1Result
     struct Surface* surf;
     f32 dx, dz;
     int cornerThresholded;
+    int edge;
 };
 
-static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceNode *surfaceNode, f32 radius, const Vec3f pos, struct WallCollisionData *data)
+struct Find1Context
+{
+    struct Find1Result result;
+    f32 best;
+};
+
+static void visit_walls_from_list(struct Find1Context* ctx, struct SurfaceNode *surfaceNode, f32 radius, const Vec3f pos, const f32 margin_radius)
 {
     const f32 corner_threshold = -0.9f;
     struct Surface *surf;
@@ -63,24 +72,15 @@ static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceN
     Vec3f v0, v1, v2;
     f32 d00, d01, d11, d20, d21;
     TerrainData type = SURFACE_DEFAULT;
-
-    const f32 margin_radius = radius - 1.0f;
-    struct Find1Result result;
-    result.surf = 0;
-    f32 best = 1000.f;
+    struct Find1Result* result = &ctx->result;
 
     // Stay in this loop until out of walls.
     while (surfaceNode != NULL) {
         surf        = surfaceNode->surface;
-
-        // TODO: Optimize...
-        for (int i = 0; i < data->numWalls; i++)
-        {
-            if (surf == data->walls[i])
-                continue;
-        }
-
         surfaceNode = surfaceNode->next;
+        if (surf->flags & 0x80)
+            continue;
+
         type        = surf->type;
 
         // Exclude a large number of walls immediately to optimize.
@@ -150,45 +150,89 @@ static inline struct Find1Result find_wall_collisions_from_list1(struct SurfaceN
             }
 
             // Update pos
-            if (priority < best)
+            if (priority < ctx->best)
             {
-                result.dx = (d00 *= invDenom);
-                result.dz = (d01 *= invDenom);
-                best = priority;
-                result.surf = surf;
+                result->dx = (d00 *= invDenom);
+                result->dz = (d01 *= invDenom);
+                ctx->best = priority;
+                result->surf = surf;
+                result->edge = 1;
                 if ((d00 * surf->normal.x) + (d01 * surf->normal.z) < (corner_threshold * offset)) {
-                    result.cornerThresholded = 1;
+                    result->cornerThresholded = 1;
+                } else {
+                    result->cornerThresholded = 0;
                 }
             }
         } else {
             f32 priority = offset <= 0.f ? offset + 100.f : offset;
-            if (priority < best)
+            if (priority < ctx->best)
             {
-                result.dx = surf->normal.x * (radius - offset);
-                result.dz = surf->normal.z * (radius - offset);
-                best = priority;
-                result.surf = surf;
-                result.cornerThresholded = 0;
+                result->dx = surf->normal.x * (radius - offset);
+                result->dz = surf->normal.z * (radius - offset);
+                ctx->best = priority;
+                result->surf = surf;
+                result->cornerThresholded = 0;
+                result->edge = 0;
             }
         }
     }
+}
 
-    return result;
+static struct Find1Result find_best_wall(const Vec3f pos, f32 radius, const f32 margin_radius)
+{
+    f32 x = pos[0];
+    f32 z = pos[2];
+
+    struct Find1Context ctx;
+    ctx.result.surf = NULL;
+    ctx.best = 1000.f;
+
+    if (is_outside_level_bounds(x, z)) {
+        return ctx.result;
+    }
+
+    s32 minCellX = GET_CELL_COORD(x - radius);
+    s32 minCellZ = GET_CELL_COORD(z - radius);
+    s32 maxCellX = GET_CELL_COORD(x + radius);
+    s32 maxCellZ = GET_CELL_COORD(z + radius);
+
+    for (s32 cellX = minCellX; cellX <= maxCellX; cellX++) {
+        for (s32 cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
+            if (1) {
+                // Check for surfaces belonging to objects.
+                struct SurfaceNode *node = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS].next;
+                visit_walls_from_list(&ctx, node, radius, pos, margin_radius);
+            }
+
+            // Check for surfaces that are a part of level geometry.
+            struct SurfaceNode *node = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS].next;
+            visit_walls_from_list(&ctx, node, radius, pos, margin_radius);
+        }
+    }
+
+    return ctx.result;
 }
 
 /**
  * Iterate through the list of walls until all walls are checked and
  * have given their wall push.
  */
-s32 find_wall_collisions_from_list(struct SurfaceNode *surfaceNode, struct WallCollisionData *data) {
+s32 find_wall_collisions_from_list(struct WallCollisionData *data) {
+    struct Surface* reported_surfaces[100];
+    int reported_surfaces_count = 0;
+    f32 radius = data->radius;
+    f32 margin_radius = data->radius - 1.0f;
     Vec3f pos = { data->x, data->y + data->offsetY, data->z };
 
     int numCols = 0;
-    for (int i = 0; i < MAX_REFERENCED_WALLS; i++)
+    while (reported_surfaces_count < 100)
     {
-        struct Find1Result result = find_wall_collisions_from_list1(surfaceNode, data->radius, pos, data);
+        struct Find1Result result = find_best_wall(pos, radius, margin_radius);
         if (!result.surf)
             break;
+
+        result.surf->flags |= 0x80;
+        reported_surfaces[reported_surfaces_count++] = result.surf;
 
         if (!result.cornerThresholded)
         {
@@ -198,9 +242,19 @@ s32 find_wall_collisions_from_list(struct SurfaceNode *surfaceNode, struct WallC
             }
             numCols++;
         }
+        
+        if (result.edge)
+        {
+            margin_radius += 0.01f;
+        }
 
         pos[0] += result.dx;
         pos[2] += result.dz;
+    }
+
+    for (int i = 0; i < reported_surfaces_count; i++)
+    {
+        reported_surfaces[i]->flags &= ~0x80;
     }
 
     data->x = pos[0];

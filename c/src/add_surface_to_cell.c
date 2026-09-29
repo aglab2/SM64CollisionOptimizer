@@ -5,7 +5,7 @@
 #include "lower_cell_index.h"
 #include "upper_cell_index.h"
 
-void add_surface(struct Surface *surface, s32 dynamic) {
+void add_surface_to_cell(struct Surface *surface, s32 dynamic) { /*add_surface*/
     s32 cellZ, cellX;
     s32 minX, maxX, minZ, maxZ;
 
@@ -19,7 +19,7 @@ void add_surface(struct Surface *surface, s32 dynamic) {
 
     for (cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
         for (cellX = minCellX; cellX <= maxCellX; cellX++) {
-            add_surface_to_cell(dynamic, cellX, cellZ, surface);
+            add_surface_to_cell_impl(dynamic, cellX, cellZ, surface);
         }
     }
 }

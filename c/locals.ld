@@ -11,3 +11,4 @@ find_wall_collisions_from_list = 0x0000000080380690;
 find_ceil_from_list = 0x80381038;
 find_floor_from_list = 0x8038156c;
 find_floor = 0x80381900;
+find_wall_best = 0x000000008038289c;

@@ -40,7 +40,6 @@ def build_contiguous_layout(functions, reloc_map):
             "relocated_addr": relocated_addr,
             "length": length,
         })
-    # Sort by relocated address
     entries.sort(key=lambda e: e["orig_addr"])
     return entries
 
@@ -59,6 +58,19 @@ def main():
         bin_path = os.path.join(BIN_DIR, f"{entry['name']}.bin")
         if os.path.exists(bin_path):
             has_bin.add(entry["name"])
+
+
+    has_bin_booked = set()
+    for entry in layout:
+        bin_path = os.path.join(BIN_DIR, f"{entry['name']}.bin")
+        if os.path.exists(bin_path):
+            my_idx = None
+            for i, e in enumerate(layout):
+                if e["orig_addr"] == entry["relocated_addr"]:
+                    my_idx = i
+                    break
+
+            has_bin_booked.add(layout[my_idx]["name"])
 
     errors = []
     spanning_groups = []  # (parent_name, [(missing_name, missing_len), ...])
@@ -94,16 +106,19 @@ def main():
                 print(f"Non contig {start_entry["name"]} -> {next_entry["name"]} because {next_entry["orig_addr"]:x} {start_entry["orig_addr"] + limit:x}")
                 break
 
-            if next_entry["name"] in has_bin:
+            if next_entry["name"] in has_bin_booked:
                 break  # Has a bin file - stop here
 
             # Missing function - span into it
             span_group.append((next_entry["name"], next_entry["length"]))
             limit += next_entry["length"]
-        if span_group:
-            spanning_groups.append((start_entry["name"], span_group))
+
+            if limit > actual_len:
+                break
 
         actual_len = os.path.getsize(os.path.join(BIN_DIR, f"{name}.bin"))
+        if span_group and actual_len > exp_len:
+            spanning_groups.append((start_entry["name"], span_group))
         if actual_len > limit:
             errors.append((name, actual_len, limit))
         elif actual_len == exp_len:
@@ -120,16 +135,41 @@ def main():
             pct = (overflow / expected_len * 100) if expected_len else float("inf")
             print(f"OVERFLOW: {name}.bin is {actual} bytes, exceeds limit of {expected_len} by {overflow} ({pct:.1f}%)")
     all_missing = []
+    spanned_names = set()
     if spanning_groups:
         for parent_name, group in spanning_groups:
             total_len = sum(length for _, length in group)
             func_names = ", ".join(name for name, _ in group)
             print(f"MISSING: {parent_name}.bin spans into missing functions ({func_names}), total expected {total_len} bytes")
             all_missing.extend(group)
+            for n, _ in group:
+                spanned_names.add(n)
     if orphan_missing:
         for name, exp_len in orphan_missing:
             print(f"MISSING: {name}.bin (expected {exp_len} bytes)")
             all_missing.append((name, exp_len))
+
+    # Report contiguous free regions: missing functions not absorbed by any span
+    free_region = []
+    for entry in layout:
+        if entry["name"] in has_bin_booked or entry["name"] in spanned_names:
+            if free_region:
+                total = sum(e["length"] for e in free_region)
+                names = ", ".join(e["name"] for e in free_region)
+                print(f"FREE: {total} bytes ({names})")
+                free_region = []
+        else:
+            # only group if contiguous with previous free entry
+            if free_region and entry["orig_addr"] != free_region[-1]["orig_addr"] + free_region[-1]["length"]:
+                total = sum(e["length"] for e in free_region)
+                names = ", ".join(e["name"] for e in free_region)
+                print(f"FREE: {total} bytes ({names})")
+                free_region = []
+            free_region.append(entry)
+    if free_region:
+        total = sum(e["length"] for e in free_region)
+        names = ", ".join(e["name"] for e in free_region)
+        print(f"FREE: {total} bytes ({names})")
     if extra:
         for name in extra:
             print(f"EXTRA: {name}.bin not in functions.json")

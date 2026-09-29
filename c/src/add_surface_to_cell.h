@@ -12,7 +12,7 @@ static inline __attribute__((always_inline)) struct SurfaceNode *alloc_surface_n
     return node;
 }
 
-static inline __attribute__((always_inline)) void add_surface_to_cell(s32 dynamic, s32 cellX, s32 cellZ, struct Surface *surface) {
+static inline __attribute__((always_inline)) void add_surface_to_cell_impl(s32 dynamic, s32 cellX, s32 cellZ, struct Surface *surface) {
     struct SurfaceNode **list;
     s32 priority;
     s32 sortDir = 1; // highest to lowest, then insertion order (water and floors)

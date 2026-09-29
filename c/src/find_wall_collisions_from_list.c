@@ -15,8 +15,6 @@
 
 #define TerrainData s16
 
-#define MAX_REFERENCED_WALLS 4
-
 static s32 check_wall_vw(f32 d00, f32 d01, f32 d11, f32 d20, f32 d21, f32 mult) {
     f32 v = ((d11 * d20) - (d01 * d21));
     if (v < 0.0f || v > mult) {
@@ -63,7 +61,7 @@ struct Find1Context
     f32 best;
 };
 
-static void visit_walls_from_list(struct Find1Context* ctx, struct SurfaceNode *surfaceNode, f32 radius, const Vec3f pos, const f32 margin_radius)
+void find_wall_collisions_from_list(struct Find1Context* ctx, struct SurfaceNode *surfaceNode, f32 radius, const Vec3f pos, const f32 margin_radius)
 {
     const f32 corner_threshold = -0.9f;
     struct Surface *surf;
@@ -176,88 +174,4 @@ static void visit_walls_from_list(struct Find1Context* ctx, struct SurfaceNode *
             }
         }
     }
-}
-
-static struct Find1Result find_best_wall(const Vec3f pos, f32 radius, const f32 margin_radius)
-{
-    f32 x = pos[0];
-    f32 z = pos[2];
-
-    struct Find1Context ctx;
-    ctx.result.surf = NULL;
-    ctx.best = 1000.f;
-
-    if (is_outside_level_bounds(x, z)) {
-        return ctx.result;
-    }
-
-    s32 minCellX = GET_CELL_COORD(x - radius);
-    s32 minCellZ = GET_CELL_COORD(z - radius);
-    s32 maxCellX = GET_CELL_COORD(x + radius);
-    s32 maxCellZ = GET_CELL_COORD(z + radius);
-
-    for (s32 cellX = minCellX; cellX <= maxCellX; cellX++) {
-        for (s32 cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
-            if (1) {
-                // Check for surfaces belonging to objects.
-                struct SurfaceNode *node = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS].next;
-                visit_walls_from_list(&ctx, node, radius, pos, margin_radius);
-            }
-
-            // Check for surfaces that are a part of level geometry.
-            struct SurfaceNode *node = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS].next;
-            visit_walls_from_list(&ctx, node, radius, pos, margin_radius);
-        }
-    }
-
-    return ctx.result;
-}
-
-/**
- * Iterate through the list of walls until all walls are checked and
- * have given their wall push.
- */
-s32 find_wall_collisions_from_list(struct WallCollisionData *data) {
-    struct Surface* reported_surfaces[100];
-    int reported_surfaces_count = 0;
-    f32 radius = data->radius;
-    f32 margin_radius = data->radius - 1.0f;
-    Vec3f pos = { data->x, data->y + data->offsetY, data->z };
-
-    int numCols = 0;
-    while (reported_surfaces_count < 100)
-    {
-        struct Find1Result result = find_best_wall(pos, radius, margin_radius);
-        if (!result.surf)
-            break;
-
-        result.surf->flags |= 0x80;
-        reported_surfaces[reported_surfaces_count++] = result.surf;
-
-        if (!result.cornerThresholded)
-        {
-            if (data->numWalls < MAX_REFERENCED_WALLS)
-            {
-                data->walls[data->numWalls++] = result.surf;
-            }
-            numCols++;
-        }
-        
-        if (result.edge)
-        {
-            margin_radius += 0.01f;
-        }
-
-        pos[0] += result.dx;
-        pos[2] += result.dz;
-    }
-
-    for (int i = 0; i < reported_surfaces_count; i++)
-    {
-        reported_surfaces[i]->flags &= ~0x80;
-    }
-
-    data->x = pos[0];
-    data->z = pos[2];
-    return numCols;
 }

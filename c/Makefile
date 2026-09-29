@@ -6,7 +6,7 @@ BIN_DIR = bin
 CPP_FILES = \
 	clear_spatial_partition \
 	clear_static_surfaces \
-	add_surface \
+	add_surface_to_cell \
 	read_surface_data \
 	surface_has_force \
 	surf_has_no_cam_collision \
@@ -18,6 +18,7 @@ CPP_FILES = \
 	load_object_surfaces \
 	load_object_collision_model \
 	find_wall_collisions_from_list \
+	max_3 \
 	f32_find_wall_collision \
 	find_wall_collisions \
 	find_ceil_from_list \

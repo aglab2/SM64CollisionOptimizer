@@ -24,7 +24,14 @@ CPP_FILES = \
 	find_ceil_from_list \
 	find_ceil \
 	find_floor \
-	find_floor_from_list
+	find_floor_from_list \
+	stop_and_set_height_to_floor \
+	stationary_ground_step \
+	perform_ground_quarter_step \
+	perform_ground_step \
+	check_ledge_grab \
+	perform_air_quarter_step \
+	perform_air_step
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

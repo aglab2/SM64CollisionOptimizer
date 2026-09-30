@@ -11,7 +11,7 @@
 #define /*0x0A0*/ O_POS_INDEX                 0x06
 #define /*0x0D0*/ O_FACE_ANGLE_INDEX                            0x12
 
-extern void obj_build_transform_from_pos_and_angle(struct Object *obj, s16 posIndex, s16 angleIndex);
+extern void build_object_transform_from_pos_and_angle(struct Object *obj, s16 posIndex, s16 angleIndex);
 
 void transform_object_vertices(TerrainData **data, TerrainData *vertexData) {
     Mat4 *objectTransform = &o->transform;
@@ -22,7 +22,7 @@ void transform_object_vertices(TerrainData **data, TerrainData *vertexData) {
 
     if (o->header.gfx.throwMatrix == NULL) {
         o->header.gfx.throwMatrix = objectTransform;
-        obj_build_transform_from_pos_and_angle(o, O_POS_INDEX, O_FACE_ANGLE_INDEX);
+        build_object_transform_from_pos_and_angle(o, O_POS_INDEX, O_FACE_ANGLE_INDEX);
     }
 
     Mat4 transform;

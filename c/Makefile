@@ -55,18 +55,19 @@ CFLAGS = -Wall -Wextra -Wno-trigraphs -Wno-missing-braces -Wno-overflow \
 	-fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -ffreestanding -fwrapv \
 	-DTARGET_N64 -D_LANGUAGE_C -DVERSION_US=1 -D_FINALROM=1 -DNDEBUG=1 \
 	-ffunction-sections -fdata-sections \
-	-nostdinc
+	-nostdinc \
+	-MMD -MP
 PYTHON = python3
 
 all: $(BIN_FILES)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) $< -c -o $@
 
 $(OBJ_DIR)/%.ld:
 	$(PYTHON) ./patch_ldscript.py $@
 
-$(BIN_DIR)/%.bin: $(OBJ_DIR)/%.o $(OBJ_DIR)/%.ld $(BIN_DIR)
+$(BIN_DIR)/%.bin: $(OBJ_DIR)/%.o $(OBJ_DIR)/%.ld | $(BIN_DIR)
 	$(LD) -o $@ -L. -L $(LIBRARY_PATH) --oformat binary -T $(OBJ_DIR)/$*.ld -M $< > /dev/null
 
 $(OBJ_DIR):
@@ -80,3 +81,5 @@ clean:
 
 .PHONY: all clean
 .SECONDARY:
+
+-include $(OBJ_FILES:.o=.d)

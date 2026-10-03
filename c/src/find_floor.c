@@ -1,8 +1,9 @@
 
 #include "types.h"
 #include "engine/surface_load.h"
-#include "config_world.h"
 #include "game/object_list_processor.h"
+
+#include "slim_world.h"
 
 struct Surface *find_floor_from_list(struct SurfaceNode *surfaceNode, s32 x, s32 y, s32 z, f32 *pheight);
 
@@ -40,7 +41,7 @@ f32 find_floor(f32 xPos, f32 yPos, f32 zPos, struct Surface **pfloor) {
 
     if (includeDynamic) {
         // Check for surfaces belonging to objects.
-        surfaceList = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS].next;
+        surfaceList = slim_ptr_read(&gSlimDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS]);
         dynamicFloor = find_floor_from_list(surfaceList, x, y, z, &dynamicHeight);
 
         // In the next check, only check for floors higher than the previous check.
@@ -48,7 +49,7 @@ f32 find_floor(f32 xPos, f32 yPos, f32 zPos, struct Surface **pfloor) {
     }
 
     // Check for surfaces that are a part of level geometry.
-    surfaceList = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS].next;
+    surfaceList = slim_ptr_read(&gSlimStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS]);
     floor = find_floor_from_list(surfaceList, x, y, z, &height);
 
     // Use the higher floor.

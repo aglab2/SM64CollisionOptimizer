@@ -5,17 +5,19 @@
 #include "game/room.h"
 #include "engine/surface_load.h"
 
+#include "slim_world.h"
+
 #define TerrainData s16
 #define RoomData s8
 
-extern void clear_spatial_partition(SpatialPartitionCell *cells);
+extern void clear_spatial_partition(SlimSpatialPartitionCell *cells);
 extern void load_static_surfaces(TerrainData **data, TerrainData *vertexData, s32 surfaceType, RoomData **surfaceRooms);
 extern void load_environmental_regions(s16 **data);
 
 #include "surface_terrains.h"
 
 static inline void clear_static_surfaces(void) {
-    clear_spatial_partition(&gStaticSurfacePartition[0][0]);
+    clear_spatial_partition(&gSlimStaticSurfacePartition[0][0]);
 }
 
 /**
@@ -42,7 +44,7 @@ void load_area_terrain(s16 index, s16 *data, s8 *surfaceRooms, s16 *macroObjects
 
     // Initialize the data for this.
     gEnvironmentRegions = NULL;
-    gSurfaceNodesAllocated = 0;
+    gSurfaceNodesAllocated = 1; // 0 is a sentinel
     gSurfacesAllocated = 0;
 
     clear_static_surfaces();

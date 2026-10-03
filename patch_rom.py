@@ -25,7 +25,7 @@ def main():
     # Collect all regions that will be written (to detect gaps later)
     regions = []
 
-    hardcoded_zero = {"max_3", "min_3", "lower_cell_index", "upper_cell_index", "add_surface"}
+    hardcoded_zero = {"min_3", "lower_cell_index", "upper_cell_index", "add_surface"}
 
     # Step 1: Zero out function regions that have .bin files or are in the hardcoded list
     for fn in functions:

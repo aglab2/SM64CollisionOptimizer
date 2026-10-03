@@ -1,14 +1,14 @@
 #include "engine/surface_load.h"
 
-#include "config_world.h"
+#include "slim_world.h"
 
-void clear_spatial_partition(SpatialPartitionCell *cells) {
+void clear_spatial_partition(SlimSpatialPartitionCell *cells) {
     register s32 i = NUM_CELLS * NUM_CELLS;
 
     while (i--) {
-        (*cells)[SPATIAL_PARTITION_FLOORS].next = NULL;
-        (*cells)[SPATIAL_PARTITION_CEILS].next = NULL;
-        (*cells)[SPATIAL_PARTITION_WALLS].next = NULL;
+        (*cells)[SPATIAL_PARTITION_FLOORS] = (struct SlimPtr){};
+        (*cells)[SPATIAL_PARTITION_CEILS] = (struct SlimPtr){};
+        (*cells)[SPATIAL_PARTITION_WALLS] = (struct SlimPtr){};
 
         cells++;
     }

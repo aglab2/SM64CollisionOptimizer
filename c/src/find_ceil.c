@@ -1,6 +1,6 @@
 #include "types.h"
 #include "engine/surface_load.h"
-#include "config_world.h"
+#include "slim_world.h"
 
 struct Surface *find_ceil_from_list(struct SurfaceNode *surfaceNode, s32 x, s32 y, s32 z, f32 *pheight);
 
@@ -31,7 +31,7 @@ f32 find_ceil(f32 posX, f32 posY, f32 posZ, struct Surface **pceil) {
 
     if (includeDynamic) {
         // Check for surfaces belonging to objects.
-        surfaceList = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_CEILS].next;
+        surfaceList = slim_ptr_read(&gSlimDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_CEILS]);
         dynamicCeil = find_ceil_from_list(surfaceList, x, y, z, &dynamicHeight);
 
         // In the next check, only check for ceilings lower than the previous check.
@@ -39,7 +39,7 @@ f32 find_ceil(f32 posX, f32 posY, f32 posZ, struct Surface **pceil) {
     }
 
     // Check for surfaces that are a part of level geometry.
-    surfaceList = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_CEILS].next;
+    surfaceList = slim_ptr_read(&gSlimStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_CEILS]);
     ceil = find_ceil_from_list(surfaceList, x, y, z, &height);
 
     // Use the lower ceiling.

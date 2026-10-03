@@ -1,6 +1,6 @@
 #include "engine/surface_load.h"
 
-#include "config_world.h"
+#include "slim_world.h"
 
 extern s32 gSurfaceNodesAllocated;
 
@@ -13,7 +13,7 @@ static inline __attribute__((always_inline)) struct SurfaceNode *alloc_surface_n
 }
 
 static inline __attribute__((always_inline)) void add_surface_to_cell_impl(s32 dynamic, s32 cellX, s32 cellZ, struct Surface *surface) {
-    struct SurfaceNode **list;
+    struct SlimPtr *list;
     s32 priority;
     s32 sortDir = 1; // highest to lowest, then insertion order (water and floors)
     s32 listIndex;
@@ -38,7 +38,7 @@ static inline __attribute__((always_inline)) void add_surface_to_cell_impl(s32 d
     newNode->surface = surface;
 
     if (dynamic) {
-        list = &gDynamicSurfacePartition[cellZ][cellX][listIndex].next;
+        list = &gSlimDynamicSurfacePartition[cellZ][cellX][listIndex];
 #if notyet
         if (sNumCellsUsed >= sizeof(sCellsUsed) / sizeof(struct CellCoords)) {
             sClearAllCells = TRUE;
@@ -52,20 +52,20 @@ static inline __attribute__((always_inline)) void add_surface_to_cell_impl(s32 d
         }
 #endif
     } else {
-        list = &gStaticSurfacePartition[cellZ][cellX][listIndex].next;
+        list = &gSlimStaticSurfacePartition[cellZ][cellX][listIndex];
     }
 
-    if (*list == NULL) {
-        *list = newNode;
+    if (list->off == 0) {
+        slim_ptr_write(list, newNode);
         return;
     }
 
-    struct SurfaceNode *curNode = *list;
+    struct SurfaceNode *curNode = slim_ptr_read(list);
 
     // Check if surface should be placed at the beginning of the list.
     priority = curNode->surface->upperY * sortDir;
     if (surfacePriority > priority) {
-        *list = newNode;
+        slim_ptr_write(list, newNode);
         newNode->next = curNode;
         return;
     }

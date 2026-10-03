@@ -9,7 +9,7 @@
 #include "sm64.h"
 #include "game/room.h"
 
-#include "config_world.h"
+#include "slim_world.h"
 
 #define o gCurrentObject
 
@@ -201,12 +201,12 @@ struct Find1Result find_wall_collisions_from_list(const Vec3f pos, f32 radius, c
         for (s32 cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
             if (1) {
                 // Check for surfaces belonging to objects.
-                struct SurfaceNode *node = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS].next;
+                struct SurfaceNode *node = slim_ptr_read(&gSlimDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS]);
                 find_wall_collisions_from_list_impl(&ctx, node, radius, pos, margin_radius);
             }
 
             // Check for surfaces that are a part of level geometry.
-            struct SurfaceNode *node = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS].next;
+            struct SurfaceNode *node = slim_ptr_read(&gSlimStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS]);
             find_wall_collisions_from_list_impl(&ctx, node, radius, pos, margin_radius);
         }
     }

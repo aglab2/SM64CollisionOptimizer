@@ -65,6 +65,9 @@
     #endif
 #endif
 
+#define LEVEL_BOUNDARY_MAX 0x8000L
+#define CELL_SIZE 0x800
+
 STATIC_ASSERT(((EXTENDED_BOUNDS_MODE >= 0) && (EXTENDED_BOUNDS_MODE <= 3)), "You must set a valid extended bounds mode!");
 
 /**

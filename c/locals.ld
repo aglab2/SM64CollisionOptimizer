@@ -14,3 +14,6 @@ find_wall_best = 0x0000000080380690;
 bonk_or_hit_lava_wall = 0x803828FC;
 perform_ground_quarter_step = 0x80255b04;
 resolve_and_return_wall_collisions_ex = 0x80382AAC;
+
+gSlimStaticSurfacePartition = 0x8038be98;
+gSlimDynamicSurfacePartition = 0x8038d698;

@@ -32,7 +32,10 @@ CPP_FILES = \
 	perform_air_quarter_step \
 	perform_air_step \
 	lower_cell_index \
-	resolve_and_return_wall_collisions_ex
+	resolve_and_return_wall_collisions_ex \
+	extrapolate_vertex_y_position \
+	is_behind_surface \
+	find_floor_height_and_data
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

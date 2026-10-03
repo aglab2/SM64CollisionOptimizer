@@ -294,5 +294,18 @@
     "ram_addr": "0x803839CC",
     "rom_addr": "0x00000010074C",
     "length": 420
+  },
+
+  {
+    "name": "extrapolate_vertex_y_position",
+    "ram_addr": "0x802cdb20",
+    "rom_addr": "0x88B20",
+    "length": 76
+  },
+  {
+    "name": "is_behind_surface",
+    "ram_addr": "0x8028a4ec",
+    "rom_addr": "0x454EC",
+    "length": 464
   }
 ]

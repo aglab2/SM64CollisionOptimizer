@@ -61,7 +61,7 @@ struct Find1Context
     f32 best;
 };
 
-void find_wall_collisions_from_list(struct Find1Context* ctx, struct SurfaceNode *surfaceNode, f32 radius, const Vec3f pos, const f32 margin_radius)
+static inline void find_wall_collisions_from_list_impl(struct Find1Context* ctx, struct SurfaceNode *surfaceNode, f32 radius, const Vec3f pos, const f32 margin_radius)
 {
     const f32 corner_threshold = -0.9f;
     struct Surface *surf;
@@ -178,4 +178,38 @@ void find_wall_collisions_from_list(struct Find1Context* ctx, struct SurfaceNode
             }
         }
     }
+}
+struct Find1Result find_wall_collisions_from_list(const Vec3f pos, f32 radius, const f32 margin_radius) /*find_wall_best*/
+{
+    f32 x = pos[0];
+    f32 z = pos[2];
+
+    struct Find1Context ctx;
+    ctx.result.surf = NULL;
+    ctx.best = 1000.f;
+
+    if (is_outside_level_bounds(x, z)) {
+        return ctx.result;
+    }
+
+    s32 minCellX = GET_CELL_COORD(x - radius);
+    s32 minCellZ = GET_CELL_COORD(z - radius);
+    s32 maxCellX = GET_CELL_COORD(x + radius);
+    s32 maxCellZ = GET_CELL_COORD(z + radius);
+
+    for (s32 cellX = minCellX; cellX <= maxCellX; cellX++) {
+        for (s32 cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
+            if (1) {
+                // Check for surfaces belonging to objects.
+                struct SurfaceNode *node = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS].next;
+                find_wall_collisions_from_list_impl(&ctx, node, radius, pos, margin_radius);
+            }
+
+            // Check for surfaces that are a part of level geometry.
+            struct SurfaceNode *node = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS].next;
+            find_wall_collisions_from_list_impl(&ctx, node, radius, pos, margin_radius);
+        }
+    }
+
+    return ctx.result;
 }

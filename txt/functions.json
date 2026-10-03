@@ -209,12 +209,20 @@
     "rom_addr": "0x0000000FF710",
     "length": 156
   },
+
   {
     "name": "add_surface",
     "ram_addr": "0x80382A2C",
     "rom_addr": "0x0000000FF7AC",
-    "length": 336
+    "length": 128
   },
+  {
+    "name": "resolve_and_return_wall_collisions_ex",
+    "ram_addr": "0x80382AAC",
+    "rom_addr": "0x0000000FF82C",
+    "length": 208
+  },
+
   {
     "name": "read_surface_data",
     "ram_addr": "0x80382B7C",

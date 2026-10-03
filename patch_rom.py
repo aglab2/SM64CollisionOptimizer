@@ -11,14 +11,11 @@ FUNCTIONS_JSON = os.path.join(SCRIPT_DIR, "txt", "functions.json")
 ROM_PATH = os.path.join(SCRIPT_DIR, "rom.z64")
 
 def main():
-    # Load function metadata
     with open(FUNCTIONS_JSON, "r") as f:
         functions = json.load(f)
 
-    # Build lookup by name
     func_map = {fn["name"]: fn for fn in functions}
 
-    # Read ROM into memory
     with open(ROM_PATH, "rb") as f:
         rom_data = bytearray(f.read())
 
@@ -28,8 +25,7 @@ def main():
     # Collect all regions that will be written (to detect gaps later)
     regions = []
 
-    # Hardcoded list of functions to zero even without .bin files
-    hardcoded_zero = {"min_3", "lower_cell_index", "upper_cell_index", "add_surface"}
+    hardcoded_zero = {"max_3", "min_3", "lower_cell_index", "upper_cell_index", "add_surface"}
 
     # Step 1: Zero out function regions that have .bin files or are in the hardcoded list
     for fn in functions:
@@ -72,7 +68,6 @@ def main():
 
         print(f"  [PATCH] {name}: rom [{fn['rom_addr']}, {hex(rom_addr + length)}) | bin={len(bin_data)}b")
 
-    # Write patched ROM
     with open(ROM_PATH, "wb") as f:
         f.write(rom_data)
 

@@ -18,7 +18,6 @@ CPP_FILES = \
 	load_object_surfaces \
 	load_object_collision_model \
 	find_wall_collisions_from_list \
-	max_3 \
 	f32_find_wall_collision \
 	find_wall_collisions \
 	find_ceil_from_list \
@@ -32,7 +31,8 @@ CPP_FILES = \
 	check_ledge_grab \
 	perform_air_quarter_step \
 	perform_air_step \
-	read_vertex_data
+	lower_cell_index \
+	resolve_and_return_wall_collisions_ex
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

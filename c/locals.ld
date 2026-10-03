@@ -7,10 +7,10 @@ load_static_surfaces = 0x0000000080383068;
 load_environmental_regions = 0x80383228;
 transform_object_vertices = 0x0000000080383614;
 load_object_surfaces = 0x0000000080383828;
-find_wall_collisions_from_list = 0x0000000080380690;
 find_ceil_from_list = 0x80381038;
 find_floor_from_list = 0x8038156c;
 find_floor = 0x80381900;
-find_wall_best = 0x000000008038289c;
-
+find_wall_best = 0x0000000080380690;
+bonk_or_hit_lava_wall = 0x803828FC;
 perform_ground_quarter_step = 0x80255b04;
+resolve_and_return_wall_collisions_ex = 0x80382AAC;

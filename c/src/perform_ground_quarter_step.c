@@ -9,7 +9,7 @@
 #define SURFACE_YAW(s) atan2s((s)->normal.z, (s)->normal.x)
 #endif
 
-extern struct Surface *resolve_and_return_wall_collisions(Vec3f pos, f32 offset, f32 radius, struct WallCollisionData *collisionData);
+extern void resolve_and_return_wall_collisions_ex(Vec3f pos, f32 offset, f32 radius, struct WallCollisionData *collisionData);
 
 static inline f32 find_mario_ceil(Vec3f pos, f32 height, struct Surface **ceil)
 { return find_ceil(pos[0], MAX(height, pos[1]) + 3.0f, pos[2], ceil); }
@@ -26,8 +26,8 @@ s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos) {
     s16 wallDYaw;
     s32 oldWallDYaw;
 
-    resolve_and_return_wall_collisions(nextPos, 30.0f, 24.0f, &lowerWall);
-    resolve_and_return_wall_collisions(nextPos, 60.0f, 50.0f, &upperWall);
+    resolve_and_return_wall_collisions_ex(nextPos, 30.0f, 24.0f, &lowerWall);
+    resolve_and_return_wall_collisions_ex(nextPos, 60.0f, 50.0f, &upperWall);
 
     f32 floorHeight = find_floor(nextPos[0], nextPos[1], nextPos[2], &floor);
     f32 ceilHeight = find_mario_ceil(nextPos, floorHeight, &ceil);

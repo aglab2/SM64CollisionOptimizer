@@ -10,14 +10,16 @@
 #define MARIO_AIR_HIT_WALL MARIO_UNKNOWN_30
 #define AIR_STEP_HIT_CEILING 7
 
-extern struct Surface *resolve_and_return_wall_collisions(Vec3f pos, f32 offset, f32 radius, struct WallCollisionData *collisionData);
-
 static inline void set_mario_wall(struct MarioState *m, struct Surface *wall)
 { m->wall = wall; }
 static inline f32 find_mario_ceil(Vec3f pos, f32 height, struct Surface **ceil)
 { return find_ceil(pos[0], MAX(height, pos[1]) + 3.0f, pos[2], ceil); }
 
-s32 read_vertex_data(struct MarioState *m, struct WallCollisionData *wallData) { /*bonk_or_hit_lava_wall*/
+// degrees define is broken...
+#undef DEGREES
+#define DEGREES(x) ((x) * 0x10000 / 360)
+
+s32 lower_cell_index(struct MarioState *m, struct WallCollisionData *wallData) { /*bonk_or_hit_lava_wall*/
     s16 i;
     s16 wallDYaw;
     s32 oldWallDYaw;

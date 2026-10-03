@@ -13,7 +13,6 @@ struct App {
     rom_data: Option<Vec<u8>>,
     patched_path: Option<PathBuf>,
     patch_status: PatchStatus,
-    expanded_functions: std::collections::HashSet<String>,
 }
 
 #[derive(Default)]

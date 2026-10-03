@@ -63,13 +63,6 @@ fn main() {
     code.push_str("    pub has_bin: bool,\n");
     code.push_str("}\n\n");
 
-    code.push_str("pub struct FunctionInfo {\n");
-    code.push_str("    pub name: &'static str,\n");
-    code.push_str("    pub ram_addr: u32,\n");
-    code.push_str("    pub rom_addr: u32,\n");
-    code.push_str("    pub length: usize,\n");
-    code.push_str("}\n\n");
-
     // Write binary data as static arrays
     for (i, (_name, _rom_addr, _length, data, _has_bin)) in patches.iter().enumerate() {
         let array_name = format!("PATCH_DATA_{}", i);
@@ -95,18 +88,6 @@ fn main() {
             name, rom_addr, length, i, has_bin
         ));
     }
-    code.push_str("];\n\n");
-
-    // Functions array (all functions from JSON, not just those with patches)
-    code.push_str("pub const FUNCTIONS: &[FunctionInfo] = &[\n");
-    for func in &functions {
-        let ram_addr: u32 = u32::from_str_radix(&func.ram_addr.replace("0x", ""), 16).unwrap();
-        let rom_addr: u32 = u32::from_str_radix(&func.rom_addr.replace("0x", ""), 16).unwrap();
-        code.push_str(&format!(
-            "    FunctionInfo {{ name: \"{}\", ram_addr: 0x{:08X}, rom_addr: 0x{:08X}, length: {} }},\n",
-            func.name, ram_addr, rom_addr, func.length
-        ));
-    }
     code.push_str("];\n");
 
     fs::write(&dest_path, code).unwrap();
@@ -115,7 +96,6 @@ fn main() {
 #[derive(serde::Deserialize)]
 struct FunctionEntry {
     name: String,
-    ram_addr: String,
     rom_addr: String,
     length: usize,
 }

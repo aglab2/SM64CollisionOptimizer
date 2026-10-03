@@ -1,12 +1,31 @@
+#include "sm64.h"
+#include "engine/math_util.h"
+#include "engine/surface_collision.h"
+#include "game/camera.h"
+#include "game/mario_step.h"
+#include "game/object_helpers.h"
 
-s32 bonk_or_hit_lava_wall(struct MarioState *m, struct WallCollisionData *wallData) {
+#define SURFACE_YAW(s) atan2s((s)->normal.z, (s)->normal.x)
+#define WALL_KICK_DEGREES 45
+#define MARIO_AIR_HIT_WALL MARIO_UNKNOWN_30
+#define AIR_STEP_HIT_CEILING 7
+
+extern struct Surface *resolve_and_return_wall_collisions(Vec3f pos, f32 offset, f32 radius, struct WallCollisionData *collisionData);
+
+static inline void set_mario_wall(struct MarioState *m, struct Surface *wall)
+{ m->wall = wall; }
+static inline f32 find_mario_ceil(Vec3f pos, f32 height, struct Surface **ceil)
+{ return find_ceil(pos[0], MAX(height, pos[1]) + 3.0f, pos[2], ceil); }
+
+s32 read_vertex_data(struct MarioState *m, struct WallCollisionData *wallData) { /*bonk_or_hit_lava_wall*/
     s16 i;
     s16 wallDYaw;
     s32 oldWallDYaw;
     s32 result = AIR_STEP_NONE;
 
     if (m->wall != NULL) {
-        oldWallDYaw = abs_angle_diff(m->wallYaw, m->faceAngle[1]);
+        s16 wallYaw = SURFACE_YAW(m->wall);
+        oldWallDYaw = abs_angle_diff(wallYaw, m->faceAngle[1]);
     } else {
         oldWallDYaw = 0x0;
     }

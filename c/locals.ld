@@ -12,3 +12,5 @@ find_ceil_from_list = 0x80381038;
 find_floor_from_list = 0x8038156c;
 find_floor = 0x80381900;
 find_wall_best = 0x000000008038289c;
+
+perform_ground_quarter_step = 0x80255b04;

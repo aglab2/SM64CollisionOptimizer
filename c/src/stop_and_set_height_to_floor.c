@@ -1,3 +1,7 @@
+#include "types.h"
+#include "engine/math_util.h"
+#include "game/mario.h"
+
 void stop_and_set_height_to_floor(struct MarioState *m) {
     struct Object *marioObj = m->marioObj;
 

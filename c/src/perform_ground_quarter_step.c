@@ -1,3 +1,23 @@
+#include "sm64.h"
+#include "engine/math_util.h"
+#include "engine/surface_collision.h"
+#include "game/camera.h"
+#include "game/mario_step.h"
+#include "game/object_helpers.h"
+
+#ifndef SURFACE_YAW
+#define SURFACE_YAW(s) atan2s((s)->normal.z, (s)->normal.x)
+#endif
+
+extern struct Surface *resolve_and_return_wall_collisions(Vec3f pos, f32 offset, f32 radius, struct WallCollisionData *collisionData);
+
+static inline f32 find_mario_ceil(Vec3f pos, f32 height, struct Surface **ceil)
+{ return find_ceil(pos[0], MAX(height, pos[1]) + 3.0f, pos[2], ceil); }
+static inline void set_mario_floor(struct MarioState *m, struct Surface *floor, f32 floorHeight)
+{ m->floor = floor; m->floorHeight = floorHeight; }
+static inline void set_mario_wall(struct MarioState *m, struct Surface *wall)
+{ m->wall = wall; }
+
 s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos) {
     struct WallCollisionData lowerWall, upperWall;
     struct Surface *ceil, *floor;
@@ -40,11 +60,11 @@ s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos) {
 
     vec3f_set(m->pos, nextPos[0], floorHeight, nextPos[2]);
 
-    fail_warp_mario_set_safe_pos(m, floor);
     set_mario_floor(m, floor, floorHeight);
 
     if (m->wall != NULL) {
-        oldWallDYaw = abs_angle_diff(m->wallYaw, m->faceAngle[1]);
+        s16 wallYaw = SURFACE_YAW(m->wall);
+        oldWallDYaw = abs_angle_diff(wallYaw, m->faceAngle[1]);
     } else {
         oldWallDYaw = 0x0;
     }

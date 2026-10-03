@@ -1,3 +1,5 @@
+#include "sm64.h"
+#include "engine/surface_collision.h"
 
 // Horizontal dot product of surface normal
 #define hdot_surf(surf, vec) (((surf)->normal.x * (vec)[0]) + ((surf)->normal.z * (vec)[2]))

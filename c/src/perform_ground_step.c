@@ -1,3 +1,12 @@
+#include "sm64.h"
+#include "engine/math_util.h"
+#include "game/mario.h"
+#include "game/mario_step.h"
+
+extern s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos);
+static inline void set_mario_wall(struct MarioState *m, struct Surface *wall)
+{ m->wall = wall; }
+
 s32 perform_ground_step(struct MarioState *m) {
     s32 i;
     u32 stepResult;

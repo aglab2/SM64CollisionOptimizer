@@ -31,7 +31,8 @@ CPP_FILES = \
 	perform_ground_step \
 	check_ledge_grab \
 	perform_air_quarter_step \
-	perform_air_step
+	perform_air_step \
+	read_vertex_data
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

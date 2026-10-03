@@ -122,6 +122,10 @@ void find_wall_collisions_from_list(struct Find1Context* ctx, struct SurfaceNode
 
         f32 mult = (d00 * d11) - (d01 * d01);
         if (check_wall_vw(d00, d01, d11, d20, d21, mult)) {
+#if 1
+            continue;
+#endif
+
             if (offset < 0) {
                 continue;
             }

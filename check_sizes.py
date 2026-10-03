@@ -95,7 +95,7 @@ def main():
                 my_idx = i
                 break
 
-        assert my_idx, f"Failed to find sym for name {name}"
+        assert my_idx is not None, f"Failed to find sym for name {name}"
 
         start_entry = layout[my_idx]
         limit = start_entry["length"]

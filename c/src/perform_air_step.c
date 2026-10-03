@@ -1,4 +1,15 @@
 
+#include "sm64.h"
+#include "engine/math_util.h"
+#include "game/mario.h"
+
+extern s32 perform_air_quarter_step(struct MarioState *m, Vec3f intendedPos, u32 stepArg);
+extern void apply_gravity(struct MarioState *m);
+extern void apply_vertical_wind(struct MarioState *m);
+
+static inline void set_mario_wall(struct MarioState *m, struct Surface *wall)
+{ m->wall = wall; }
+
 s32 perform_air_step(struct MarioState *m, u32 stepArg) {
     Vec3f intendedPos;
     const f32 numSteps = 4.0f;

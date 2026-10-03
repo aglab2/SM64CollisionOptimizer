@@ -1,5 +1,5 @@
 use crate::checksum;
-use crate::embedded_data::{PATCHES, FUNCTIONS};
+use crate::embedded_data::{PATCHES};
 
 /// Patch a ROM image using embedded bin data.
 /// Zeros out regions for functions with .bin files or hardcoded_zero entries,
@@ -60,16 +60,6 @@ pub fn patch_rom(rom: &mut [u8]) -> Result<(), String> {
     Ok(())
 }
 
-/// Get the list of all function names that will be patched.
-pub fn patched_function_names() -> Vec<&'static str> {
-    PATCHES.iter().map(|p| p.name).collect()
-}
-
-/// Get all function info for display in the UI.
-pub fn all_functions() -> &'static [crate::embedded_data::FunctionInfo] {
-    FUNCTIONS
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -97,13 +87,5 @@ mod tests {
         let stored_crc2 = ((rom[0x14] as u32) << 24) | ((rom[0x15] as u32) << 16) | ((rom[0x16] as u32) << 8) | (rom[0x17] as u32);
         assert_eq!(crc1, stored_crc1);
         assert_eq!(crc2, stored_crc2);
-    }
-
-    #[test]
-    fn test_patch_function_names() {
-        let names = patched_function_names();
-        assert!(!names.is_empty());
-        // lower_cell_index should be included (hardcoded_zero)
-        assert!(names.contains(&"lower_cell_index"));
     }
 }

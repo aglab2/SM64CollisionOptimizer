@@ -65,6 +65,7 @@ impl eframe::App for App {
         });
 
         ScrollArea::both().show(ui, |ui| {
+            // TODO: Planned configs
             ui.label("Hi!");
         });
 
@@ -91,7 +92,7 @@ impl eframe::App for App {
 impl App {
     fn open_rom_dialog(&mut self) {
         let file_result = rfd::FileDialog::new()
-            .add_filter("N64 ROM", &["z64", "n64", "rom"])
+            .add_filter("N64 ROM", &["z64"])
             .add_filter("All files", &["*"])
             .pick_file();
 

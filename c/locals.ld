@@ -17,3 +17,7 @@ resolve_and_return_wall_collisions_ex = 0x80382AAC;
 
 gSlimStaticSurfacePartition = 0x8038be98;
 gSlimDynamicSurfacePartition = 0x8038d698;
+
+gFloorLimit = 0x803373B4; 
+gCeilLimit = 0x803373B8;
+

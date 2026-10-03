@@ -59,27 +59,28 @@ fn sm64_calc_checksums_impl(buf: &[u8], cksum: &mut [u32; 2]) {
         // XOR carry detection
         let xor_carry = a2 < v0_raw;
 
+        // Delay slot: a3 = a3 + v0 (from instruction 620)
+        a3 = a3.wrapping_add(v0_raw);
+
         // Delay slot operations
         s0 = s0.wrapping_add(a0_rot);
 
         // Main operations
         t3 ^= v0_raw;
 
-        let (a2_new, _a3_tmp) = if xor_carry {
+        // Conditional uses updated a3 (from delay slot at 620)
+        if xor_carry {
             let t9 = a3 ^ v0_raw;
-            (t9 ^ a2, a3)
+            a2 ^= t9;
         } else {
-            (a2 ^ a0_rot, a3)
-        };
-        a2 = a2_new;
+            a2 ^= a0_rot;
+        }
 
         // Delay slot operations
         t0 += 4;
         let t7_xor = v0_raw ^ s0;
         t1 += 4;
         t4 = t4.wrapping_add(t7_xor);
-
-        a3 = _a3_tmp;
     }
 
     // Final reduction (post-loop)

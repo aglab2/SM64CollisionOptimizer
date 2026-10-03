@@ -7,7 +7,7 @@
 typedef s16 SurfaceType;
 
 static s32 check_within_floor_triangle_bounds(s32 x, s32 z, struct Surface *surf) {
-    Vec3i vx, vz;
+    Vec3f vx, vz;
     vx[0] = surf->vertex1[0];
     vz[0] = surf->vertex1[2];
     vx[1] = surf->vertex2[0];

@@ -35,7 +35,8 @@ CPP_FILES = \
 	resolve_and_return_wall_collisions_ex \
 	extrapolate_vertex_y_position \
 	is_behind_surface \
-	find_floor_height_and_data
+	find_floor_height_and_data \
+	add_ceil_margin
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

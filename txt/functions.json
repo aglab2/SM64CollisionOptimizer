@@ -302,10 +302,17 @@
     "rom_addr": "0x88B20",
     "length": 76
   },
+
   {
     "name": "is_behind_surface",
     "ram_addr": "0x8028a4ec",
     "rom_addr": "0x454EC",
-    "length": 464
+    "length": 276
+  },
+  {
+    "name": "add_ceil_margin",
+    "ram_addr": "0x8028a600",
+    "rom_addr": "0x45600",
+    "length": 188
   }
 ]

@@ -25,7 +25,7 @@ static inline struct Surface *alloc_surface(void) {
 }
 
 struct Surface *read_surface_data(s16 *vertexData, s16 **vertexIndices) {
-    Vec3t v[3];
+    Vec3f v[3];
     Vec3f n;
     Vec3t offset;
     s16 min, max;

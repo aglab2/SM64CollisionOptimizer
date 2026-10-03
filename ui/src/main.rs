@@ -11,6 +11,7 @@ use std::path::PathBuf;
 struct App {
     rom_path: Option<PathBuf>,
     rom_data: Option<Vec<u8>>,
+    patched_path: Option<PathBuf>,
     patch_status: PatchStatus,
     expanded_functions: std::collections::HashSet<String>,
 }
@@ -57,8 +58,15 @@ impl eframe::App for App {
                                     "Failed to save: {}",
                                     e
                                 ));
+                            } else {
+                                self.patched_path = Some(out_path);
                             }
                         }
+                    }
+                }
+                if ui.button("Reveal Patched ROM").clicked() {
+                    if let Some(ref path) = self.patched_path {
+                        self.reveal_in_file_manager(path);
                     }
                 }
             });
@@ -73,13 +81,20 @@ impl eframe::App for App {
         Panel::bottom("bottom_panel").show(ui, |ui| {
             match &self.patch_status {
                 PatchStatus::Idle => {
-                    ui.label("Ready. Open a ROM file to begin.");
+                    if self.rom_path.is_some() {
+                        ui.label("ROM loaded. Click \"Open ROM\" to patch and save.");
+                    } else {
+                        ui.label("Ready. Open a ROM file to begin.");
+                    }
                 }
                 PatchStatus::Patching => {
                     ui.label("Patching...");
                 }
                 PatchStatus::Success => {
                     ui.label(RichText::new("ROM patched successfully!").color(Color32::GREEN),);
+                    if let Some(ref path) = self.patched_path {
+                        ui.label(format!("Saved: {}. Click \"Reveal Patched ROM\" to locate it.", path.display()));
+                    }
                 }
                 PatchStatus::Error(msg) => {
                     ui.label(RichText::new(format!("Error: {}", msg)).color(Color32::RED),);
@@ -132,5 +147,41 @@ impl App {
         }
 
         self.rom_data = Some(rom_data);
+    }
+
+    fn reveal_in_file_manager(&self, path: &PathBuf) {
+        if !path.exists() {
+            return;
+        }
+        #[cfg(target_os = "macos")]
+        let _ = std::process::Command::new("open")
+            .arg("-R")
+            .arg(path)
+            .spawn();
+        #[cfg(target_os = "windows")]
+        let _ = std::process::Command::new("explorer")
+            .args(["/select," , path.to_str().unwrap()])
+            .spawn();
+        #[cfg(target_os = "linux")]
+        {
+            // Try all supported file managers in order of popularity
+            let file = path.to_str().unwrap();
+            let args = vec!["open", "--select", file];
+            if let Ok(output) = std::process::Command::new("gio")
+                .args(&args)
+                .output()
+            {
+                if output.status.success() {
+                    return;
+                }
+            }
+
+            // Last resort: open parent directory
+            if let Some(parent) = path.parent() {
+                let _ = std::process::Command::new("xdg-open")
+                    .arg(parent)
+                    .spawn();
+            }
+        }
     }
 }

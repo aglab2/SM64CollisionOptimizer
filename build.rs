@@ -11,21 +11,7 @@ fn main() {
     let functions_json = txt_dir.join("functions.json");
     let build_dir = Path::new(&project_root).join("build");
 
-    // --- Step 1: Build C code via make ---
-    println!("cargo:warning=Building C collision modules...");
-
-    fs::create_dir_all(&c_bin_dir).ok();
-
-    let make_status = Command::new("make")
-        .current_dir(&c_dir)
-        .status()
-        .expect("Failed to run make. Is mips-n64-gcc on PATH?");
-
-    if !make_status.success() {
-        panic!("make failed in c/");
-    }
-
-    // Watch C sources, Makefile, and ldpatcher
+    // --- Watch all C/Makefile dependencies ---
     for entry in fs::read_dir(c_dir.join("src")).unwrap() {
         let path = entry.unwrap().path();
         if path.extension().map_or(false, |ext| ext == "c" || ext == "h") {
@@ -42,6 +28,28 @@ fn main() {
         c_dir.join("sm64-api/sm64").display()
     );
     println!("cargo:rerun-if-changed={}", functions_json.display());
+
+    // --- Step 1: Build C code via make ---
+    fs::create_dir_all(&c_bin_dir).ok();
+
+    let output = Command::new("make")
+        .current_dir(&c_dir)
+        .output()
+        .expect("Failed to run make. Is mips-n64-gcc on PATH?");
+
+    // Print make's output so the user can see what's happening
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    if !stdout.is_empty() {
+        print!("{stdout}");
+    }
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    if !stderr.is_empty() {
+        eprint!("{stderr}");
+    }
+
+    if !output.status.success() {
+        panic!("make failed in c/");
+    }
 
     // --- Step 2: Generate embedded_data.rs ---
     let functions_data = fs::read_to_string(&functions_json).unwrap();

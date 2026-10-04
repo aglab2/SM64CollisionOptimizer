@@ -3,6 +3,7 @@ name = "better_sm64_collision"
 version = "0.1.0"
 edition = "2024"
 build = "build.rs"
+default-run = "better_sm64_collision"
 
 [dependencies]
 egui = "0.36.2"

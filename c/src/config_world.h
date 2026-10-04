@@ -87,8 +87,8 @@ STATIC_ASSERT(((EXTENDED_BOUNDS_MODE >= 0) && (EXTENDED_BOUNDS_MODE <= 3)), "You
 // Vanilla value is 78.
 #define FIND_FLOOR_BUFFER 78
 
-extern f32 gFloorLimit;
-extern f32 gCeilLimit;
+extern const f32 gFloorLimit;
+extern const f32 gCeilLimit;
 
 #define CELL_HEIGHT_LIMIT            gCeilLimit
 #define FLOOR_LOWER_LIMIT            gFloorLimit

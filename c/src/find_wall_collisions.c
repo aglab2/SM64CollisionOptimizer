@@ -2,6 +2,7 @@
 #include "engine/surface_collision.h"
 #include "engine/surface_load.h"
 #include "config_world.h"
+#include "cfg.h"
 
 #define MAX_REFERENCED_WALLS 4
 
@@ -50,7 +51,7 @@ s32 find_wall_collisions(struct WallCollisionData *data) {
         
         if (result.edge)
         {
-            margin_radius += 0.01f;
+            margin_radius += gCollisionConfig.normalFloorCeilThreshold;
         }
 
         pos[0] += result.dx;

@@ -4,9 +4,9 @@
 #include "game/camera.h"
 #include "game/mario_step.h"
 #include "game/object_helpers.h"
+#include "cfg.h"
 
 #define SURFACE_YAW(s) atan2s((s)->normal.z, (s)->normal.x)
-#define WALL_KICK_DEGREES 45
 #define MARIO_AIR_HIT_WALL MARIO_UNKNOWN_30
 #define AIR_STEP_HIT_CEILING 7
 

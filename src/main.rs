@@ -8,10 +8,38 @@ use egui::{Color32, Panel, RichText, ScrollArea, Ui, Vec2};
 use std::{path::PathBuf};
 use anyhow::{Context, Result};
 
+#[derive(Default, Clone, PartialEq)]
+struct CollisionConfig {
+    wallkick_angle: f32,       // degrees (0-180), default 90 (matches gCollisionConfig)
+    num_quarter_steps: u32,    // 1-16, default 4
+    normal_floor_ceil_threshold: f32, // 0.001-0.1, default 0.01
+}
+
+impl CollisionConfig {
+    /// Pack into ROM bytes (big-endian, N64 format)
+    fn to_rom_bytes(&self) -> [u8; 12] {
+        // wallkickAngle: s16 in fixed-point (DEGREES macro: degrees * 0x10000 / 360)
+        let wallkick_fp = (self.wallkick_angle * 65536.0 / 360.0) as u16;
+        // numQuarterSteps: s16
+        let num_steps = self.num_quarter_steps as u16;
+        // normalFloorCeilThreshold: f32
+        let threshold = self.normal_floor_ceil_threshold;
+
+        [
+            (wallkick_fp >> 8) as u8, (wallkick_fp & 0xFF) as u8,
+            (num_steps >> 8) as u8, (num_steps & 0xFF) as u8,
+            threshold.to_be_bytes()[0], threshold.to_be_bytes()[1],
+            threshold.to_be_bytes()[2], threshold.to_be_bytes()[3],
+            0, 0, 0, 0, // padding to 12 bytes
+        ]
+    }
+}
+
 #[derive(Default)]
 struct App {
     patched_path: Option<PathBuf>,
     patch_status: PatchStatus,
+    collision_config: CollisionConfig,
 }
 
 #[derive(Default)]
@@ -53,8 +81,40 @@ impl eframe::App for App {
         });
 
         ScrollArea::both().show(ui, |ui| {
-            // TODO: Planned configs
-            ui.label("Hi!");
+            ui.heading("Collision Configuration");
+            ui.separator();
+
+            let mut config = self.collision_config.clone();
+
+            ui.group(|ui| {
+                ui.label("Wall Kick Angle (degrees)");
+                ui.add(egui::Slider::new(&mut config.wallkick_angle, 0.0..=90.0)
+                    .suffix("°"));
+            });
+
+            ui.group(|ui| {
+                ui.label("Quarter Steps");
+                ui.add(egui::Slider::new(&mut config.num_quarter_steps, 1..=16)
+                    .suffix(" steps"));
+            });
+
+            ui.group(|ui| {
+                ui.label("Normal Floor/Ceil Threshold");
+                ui.add(egui::Slider::new(&mut config.normal_floor_ceil_threshold, 0.001..=0.1)
+                    .suffix(""));
+            });
+
+            ui.separator();
+            ui.label(RichText::new(format!(
+                "Current values: wallkickAngle=0x{:04X}, numQuarterSteps={}, normalFloorCeilThreshold={:.4}",
+                (config.wallkick_angle * 65536.0 / 360.0) as u16,
+                config.num_quarter_steps,
+                config.normal_floor_ceil_threshold
+            )).color(ui.visuals().weak_text_color()));
+
+            if config != self.collision_config {
+                self.collision_config = config;
+            }
         });
 
         Panel::bottom("bottom_panel").show(ui, |ui| {
@@ -94,10 +154,17 @@ impl App {
 
     fn do_patch(&self, path: PathBuf) -> Result<PathBuf> {
         let rom = self.open_rom(&path)
-                      .with_context(|| format!("Failed to open ROM {}", path.to_string_lossy()))?;
+                         .with_context(|| format!("Failed to open ROM {}", path.to_string_lossy()))?;
 
-        let patched_rom = self.patch_rom(rom)
+        let mut patched_rom = self.patch_rom(rom)
                               .with_context(|| "Failed to patch ROM")?;
+
+        // Write collision config to ROM at gCollisionConfig address (0xFFF50)
+        let config_bytes = self.collision_config.to_rom_bytes();
+        let config_addr = 0xFFF50usize;
+        if config_addr + config_bytes.len() <= patched_rom.len() {
+            patched_rom[config_addr..config_addr + config_bytes.len()].copy_from_slice(&config_bytes);
+        }
 
         let out_path = path.with_file_name(format!(
             "{}_patched.z64",

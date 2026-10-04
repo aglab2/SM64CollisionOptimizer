@@ -2,6 +2,7 @@
 #include "sm64.h"
 #include "engine/math_util.h"
 #include "game/mario.h"
+#include "cfg.h"
 
 extern s32 perform_air_quarter_step(struct MarioState *m, Vec3f intendedPos, u32 stepArg);
 extern void apply_gravity(struct MarioState *m);
@@ -12,17 +13,16 @@ static inline void set_mario_wall(struct MarioState *m, struct Surface *wall)
 
 s32 perform_air_step(struct MarioState *m, u32 stepArg) {
     Vec3f intendedPos;
-    const f32 numSteps = 4.0f;
     s32 i;
     s32 quarterStepResult;
     s32 stepResult = AIR_STEP_NONE;
 
     set_mario_wall(m, NULL);
 
-    for (i = 0; i < 4; i++) {
-        intendedPos[0] = m->pos[0] + m->vel[0] / numSteps;
-        intendedPos[1] = m->pos[1] + m->vel[1] / numSteps;
-        intendedPos[2] = m->pos[2] + m->vel[2] / numSteps;
+    for (i = 0; i < gCollisionConfig.numQuarterSteps; i++) {
+        intendedPos[0] = m->pos[0] + m->vel[0] / (f32)gCollisionConfig.numQuarterSteps;
+        intendedPos[1] = m->pos[1] + m->vel[1] / (f32)gCollisionConfig.numQuarterSteps;
+        intendedPos[2] = m->pos[2] + m->vel[2] / (f32)gCollisionConfig.numQuarterSteps;
 
         quarterStepResult = perform_air_quarter_step(m, intendedPos, stepArg);
 

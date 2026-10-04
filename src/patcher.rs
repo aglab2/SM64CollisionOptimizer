@@ -1,4 +1,3 @@
-use crate::checksum;
 use crate::embedded_data::{PATCHES};
 use crate::patcher::Error::{Mismatch, TooShort};
 use std::result;
@@ -61,9 +60,6 @@ pub fn patch_rom(rom: &mut [u8]) -> Result<()> {
         }
     }
 
-    // Step 4: Calculate and write N64 header checksums
-    checksum::update_header_checksums(rom);
-
     Ok(())
 }
 
@@ -87,12 +83,5 @@ mod tests {
             let start = patch.rom_addr as usize;
             assert_eq!(&rom[start..start + patch.data.len()], patch.data);
         }
-
-        // Verify checksums are now valid (recalculate and compare)
-        let (crc1, crc2) = checksum::calculate_checksums(&rom);
-        let stored_crc1 = ((rom[0x10] as u32) << 24) | ((rom[0x11] as u32) << 16) | ((rom[0x12] as u32) << 8) | (rom[0x13] as u32);
-        let stored_crc2 = ((rom[0x14] as u32) << 24) | ((rom[0x15] as u32) << 16) | ((rom[0x16] as u32) << 8) | (rom[0x17] as u32);
-        assert_eq!(crc1, stored_crc1);
-        assert_eq!(crc2, stored_crc2);
     }
 }

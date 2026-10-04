@@ -2,6 +2,7 @@
 
 // For the static assert macro
 #include "macros.h"
+#include "cfg.h"
 
 /**
  * World scale value. This allows you to scale down geometry by the given amount, which allows for larger levels
@@ -80,7 +81,7 @@ STATIC_ASSERT(((EXTENDED_BOUNDS_MODE >= 0) && (EXTENDED_BOUNDS_MODE <= 3)), "You
  */
 #define GET_CELL_COORD(p)   ((((s32)(p) + LEVEL_BOUNDARY_MAX) / CELL_SIZE) & (NUM_CELLS - 1))
 
-#define NORMAL_FLOOR_THRESHOLD 0.01f
+#define NORMAL_FLOOR_THRESHOLD gCollisionConfig.normalFloorCeilThreshold
 #define NORMAL_CEIL_THRESHOLD -NORMAL_FLOOR_THRESHOLD
 
 // The y coord is moved upward by this amount when finding floors.

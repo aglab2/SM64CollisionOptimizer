@@ -21,3 +21,4 @@ gSlimDynamicSurfacePartition = 0x8038d698;
 gFloorLimit = 0x803373B4; 
 gCeilLimit = 0x803373B8;
 
+gCollisionConfig = 0x803831d0;

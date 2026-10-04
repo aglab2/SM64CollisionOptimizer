@@ -51,7 +51,7 @@ s32 find_wall_collisions(struct WallCollisionData *data) {
         
         if (result.edge)
         {
-            margin_radius += gCollisionConfig.normalFloorCeilThreshold;
+            margin_radius += 0.01f;
         }
 
         pos[0] += result.dx;

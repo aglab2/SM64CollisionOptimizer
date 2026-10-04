@@ -5,24 +5,54 @@ mod checksum;
 mod patcher;
 
 use egui::{Color32, Panel, RichText, ScrollArea, Ui, Vec2};
-use std::{path::PathBuf};
+use std::path::PathBuf;
 use anyhow::{Context, Result};
 
-#[derive(Default, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 struct CollisionConfig {
-    wallkick_angle: f32,       // degrees (0-180), default 90 (matches gCollisionConfig)
-    num_quarter_steps: u32,    // 1-16, default 4
-    normal_floor_ceil_threshold: f32, // 0.001-0.1, default 0.01
+    wallkick_angle_raw: u16,
+    num_quarter_steps: u16,
+    normal_floor_ceil_threshold: f32,
+}
+
+/// Parse a wallkick angle string supporting both degrees and raw s16 values.
+/// Accepts: "0x4000", "16384", "0x7fff"
+fn parse_wallkick_angle(input: &str) -> Option<u16> {
+    let trimmed = input.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    // Try hex format: 0x4000
+    if trimmed.starts_with("0x") || trimmed.starts_with("0X") {
+        if let Ok(val) = u16::from_str_radix(&trimmed[2..], 16) {
+            return Some(val);
+        }
+    }
+
+    // Try raw decimal s16 value
+    if let Ok(raw) = u16::from_str_radix(&trimmed, 16) {
+        return Some(raw.min(0x7FFF));
+    }
+
+    None
 }
 
 impl CollisionConfig {
+    /// Convert degrees to raw s16 angle value (DEGREES macro: degrees * 0x10000 / 360)
+    fn degrees_to_raw(degrees: f64) -> u16 {
+        ((degrees * 65536.0 / 360.0) as u16).min(0x7FFF)
+    }
+
+    /// Convert raw s16 angle value to degrees
+    fn raw_to_degrees(raw: u16) -> f64 {
+        raw as f64 * 360.0 / 65536.0
+    }
+
     /// Pack into ROM bytes (big-endian, N64 format)
     fn to_rom_bytes(&self) -> [u8; 12] {
-        // wallkickAngle: s16 in fixed-point (DEGREES macro: degrees * 0x10000 / 360)
-        let wallkick_fp = (self.wallkick_angle * 65536.0 / 360.0) as u16;
-        // numQuarterSteps: s16
+        let wallkick_fp = self.wallkick_angle_raw;
         let num_steps = self.num_quarter_steps as u16;
-        // normalFloorCeilThreshold: f32
         let threshold = self.normal_floor_ceil_threshold;
 
         [
@@ -32,6 +62,16 @@ impl CollisionConfig {
             threshold.to_be_bytes()[2], threshold.to_be_bytes()[3],
             0, 0, 0, 0, // padding to 12 bytes
         ]
+    }
+}
+
+impl Default for CollisionConfig {
+    fn default() -> Self {
+        Self {
+            wallkick_angle_raw: 0x2000,
+            num_quarter_steps: 4,
+            normal_floor_ceil_threshold: 0.05,
+        }
     }
 }
 
@@ -81,15 +121,23 @@ impl eframe::App for App {
         });
 
         ScrollArea::both().show(ui, |ui| {
-            ui.heading("Collision Configuration");
-            ui.separator();
-
             let mut config = self.collision_config.clone();
 
             ui.group(|ui| {
-                ui.label("Wall Kick Angle (degrees)");
-                ui.add(egui::Slider::new(&mut config.wallkick_angle, 0.0..=90.0)
-                    .suffix("°"));
+                ui.label("Wallkick Angle");
+
+                let mut deg = CollisionConfig::raw_to_degrees(config.wallkick_angle_raw);
+                ui.add(egui::Slider::new(&mut deg, 0.0..=90.0).suffix("°"));
+                config.wallkick_angle_raw = CollisionConfig::degrees_to_raw(deg);
+
+                let mut raw = config.wallkick_angle_raw;
+                ui.add(egui::DragValue::new(&mut raw)
+                    .custom_formatter(|v, _| format!("0x{:04X}", v as u32).into())
+                    .custom_parser(|s| {
+                        parse_wallkick_angle(&s).map(|v| v as f64)
+                    })
+                    .speed(256.0));
+                config.wallkick_angle_raw = raw.min(0x7FFF);
             });
 
             ui.group(|ui| {
@@ -100,17 +148,9 @@ impl eframe::App for App {
 
             ui.group(|ui| {
                 ui.label("Normal Floor/Ceil Threshold");
-                ui.add(egui::Slider::new(&mut config.normal_floor_ceil_threshold, 0.001..=0.1)
+                ui.add(egui::Slider::new(&mut config.normal_floor_ceil_threshold, 0.01..=0.08)
                     .suffix(""));
             });
-
-            ui.separator();
-            ui.label(RichText::new(format!(
-                "Current values: wallkickAngle=0x{:04X}, numQuarterSteps={}, normalFloorCeilThreshold={:.4}",
-                (config.wallkick_angle * 65536.0 / 360.0) as u16,
-                config.num_quarter_steps,
-                config.normal_floor_ceil_threshold
-            )).color(ui.visuals().weak_text_color()));
 
             if config != self.collision_config {
                 self.collision_config = config;
@@ -125,7 +165,8 @@ impl eframe::App for App {
                 PatchStatus::Success => {
                     ui.label(RichText::new("ROM patched successfully!").color(Color32::GREEN),);
                     if let Some(ref path) = self.patched_path {
-                        ui.label(format!("Saved: {}. Click \"Reveal Patched ROM\" to locate it.", path.display()));
+                        let name = path.file_name().map(|v| v.display().to_string());
+                        ui.label(format!("Saved: {}", name.unwrap()));
                     }
                 }
                 PatchStatus::Error(msg) => {
@@ -166,12 +207,14 @@ impl App {
             patched_rom[config_addr..config_addr + config_bytes.len()].copy_from_slice(&config_bytes);
         }
 
+        checksum::update_header_checksums(&mut patched_rom);
+
         let out_path = path.with_file_name(format!(
             "{}_patched.z64",
             path.file_stem().unwrap().to_string_lossy()
         ));
 
-        std::fs::write(&out_path, patched_rom).with_context(|| format!("Failed to write patched ROM {}", out_path.to_string_lossy()))?;
+        std::fs::write(&out_path, patched_rom).with_context(|| format!("Failed to write patched ROM {}", out_path.display()))?;
         Ok(out_path)
     }
 

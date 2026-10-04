@@ -191,6 +191,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.104"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
+
+[[package]]
 name = "arboard"
 version = "3.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -421,6 +427,7 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 name = "better_sm64_collision"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bytemuck",
  "eframe",
  "egui",
@@ -428,6 +435,7 @@ dependencies = [
  "rfd",
  "serde",
  "serde_json",
+ "thiserror 2.0.21",
  "winit",
 ]
 

@@ -1,22 +1,34 @@
 use crate::checksum;
 use crate::embedded_data::{PATCHES};
+use crate::patcher::Error::{Mismatch, TooShort};
+use std::result;
+
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("ROM file is too short, need at least {size}")]
+    TooShort{
+        size: u32,
+    },
+
+    #[error("Patch {name} is mismatching after application")]
+    Mismatch{
+        name: &'static str
+    },
+}
+type Result<T> = result::Result<T, Error>;
 
 /// Patch a ROM image using embedded bin data.
 /// Zeros out regions for functions with .bin files or hardcoded_zero entries,
 /// then writes the binary data into those regions.
-pub fn patch_rom(rom: &mut [u8]) -> Result<(), String> {
+pub fn patch_rom(rom: &mut [u8]) -> Result<()> {
     let rom_size = rom.len();
 
     // Step 1: Zero out all function regions (use JSON length for zeroing)
     for patch in PATCHES {
         if patch.rom_addr as usize + patch.length > rom_size {
-            return Err(format!(
-                "{}: region [{:#010X}, {:#010X}) exceeds ROM size ({})",
-                patch.name,
-                patch.rom_addr,
-                patch.rom_addr + patch.length as u32,
-                rom_size
-            ));
+            return Err(TooShort{ size: patch.rom_addr + patch.length as u32 });
         }
 
         let start = patch.rom_addr as usize;
@@ -37,7 +49,7 @@ pub fn patch_rom(rom: &mut [u8]) -> Result<(), String> {
     }
 
     // Step 3: Verify written content matches source data
-    // Only verify patches that have actual .bin files (matching Python script behavior)
+    // Only verify patches that have actual .bin files
     for patch in PATCHES {
         if !patch.has_bin {
             continue;
@@ -45,12 +57,7 @@ pub fn patch_rom(rom: &mut [u8]) -> Result<(), String> {
         let start = patch.rom_addr as usize;
         let rom_region = &rom[start..start + patch.data.len()];
         if rom_region != patch.data {
-            return Err(format!(
-                "{}: mismatch after write! ({} bytes at {:#010X})",
-                patch.name,
-                patch.data.len(),
-                patch.rom_addr
-            ));
+            return Err(Mismatch{ name: patch.name });
         }
     }
 

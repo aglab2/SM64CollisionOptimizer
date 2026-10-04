@@ -5,12 +5,11 @@ mod checksum;
 mod patcher;
 
 use egui::{Color32, Panel, RichText, ScrollArea, Ui, Vec2};
-use std::path::PathBuf;
+use std::{path::PathBuf};
+use anyhow::{Context, Result};
 
 #[derive(Default)]
 struct App {
-    rom_path: Option<PathBuf>,
-    rom_data: Option<Vec<u8>>,
     patched_path: Option<PathBuf>,
     patch_status: PatchStatus,
 }
@@ -19,7 +18,6 @@ struct App {
 enum PatchStatus {
     #[default]
     Idle,
-    Patching,
     Success,
     Error(String),
 }
@@ -42,29 +40,12 @@ impl eframe::App for App {
         Panel::top("top_panel").show(ui, |ui| {
             ui.horizontal(|ui| {
                 if ui.button("Open ROM").clicked() {
-                    self.open_rom_dialog();
-                    self.patch_rom();
-
-                    if let Some(ref path) = self.rom_path {
-                        let out_path = path.with_file_name(format!(
-                            "{}_patched.z64",
-                            path.file_stem().unwrap().to_string_lossy()
-                        ));
-
-                        if let Some(ref data) = self.rom_data {
-                            if let Err(e) = std::fs::write(&out_path, data) {
-                                self.patch_status = PatchStatus::Error(format!(
-                                    "Failed to save: {}",
-                                    e
-                                ));
-                            } else {
-                                self.patched_path = Some(out_path);
-                            }
-                        }
-                    }
+                    let (path, status) = self.open_rom_dialog();
+                    self.patch_status = status;
+                    self.patched_path = path;
                 }
-                if ui.button("Reveal Patched ROM").clicked() {
-                    if let Some(ref path) = self.patched_path {
+                if let Some(ref path) = self.patched_path {
+                    if ui.button("Reveal Patched ROM").clicked() {
                         self.reveal_in_file_manager(path);
                     }
                 }
@@ -76,18 +57,10 @@ impl eframe::App for App {
             ui.label("Hi!");
         });
 
-        // Bottom panel for status
         Panel::bottom("bottom_panel").show(ui, |ui| {
             match &self.patch_status {
                 PatchStatus::Idle => {
-                    if self.rom_path.is_some() {
-                        ui.label("ROM loaded. Click \"Open ROM\" to patch and save.");
-                    } else {
-                        ui.label("Ready. Open a ROM file to begin.");
-                    }
-                }
-                PatchStatus::Patching => {
-                    ui.label("Patching...");
+                    ui.label("Ready. Open a ROM file to begin.");
                 }
                 PatchStatus::Success => {
                     ui.label(RichText::new("ROM patched successfully!").color(Color32::GREEN),);
@@ -104,48 +77,50 @@ impl eframe::App for App {
 }
 
 impl App {
-    fn open_rom_dialog(&mut self) {
-        let file_result = rfd::FileDialog::new()
-            .add_filter("N64 ROM", &["z64"])
-            .add_filter("All files", &["*"])
-            .pick_file();
+    fn open_rom_dialog(&self) -> (Option<PathBuf>, PatchStatus) {
+        let Some(path) = self.select_rom() else { return (None, PatchStatus::Idle) };
+        let result = self.do_patch(path);
 
-        if let Some(path) = file_result {
-            self.rom_path = Some(path.clone());
-            match std::fs::read(&path) {
-                Ok(data) => {
-                    // Validate it looks like an N64 ROM
-                    if data.len() >= 0x10 && data.len() % 8 == 0 {
-                        self.rom_data = Some(data);
-                        self.patch_status = PatchStatus::Idle;
-                    } else {
-                        self.patch_status = PatchStatus::Error(
-                            "Invalid ROM file (bad size or header)".to_string(),
-                        );
-                    }
-                }
-                Err(e) => {
-                    self.patch_status = PatchStatus::Error(format!("Failed to read ROM: {}", e));
-                }
+        match result {
+            Ok(path) => {
+                (Some(path), PatchStatus::Success)
+            },
+
+            Err(e) => {
+                (None, PatchStatus::Error(format!("{}", e)))
             }
         }
     }
 
-    fn patch_rom(&mut self) {
-        let mut rom_data = match &self.rom_data {
-            Some(data) => data.clone(),
-            None => return,
-        };
+    fn do_patch(&self, path: PathBuf) -> Result<PathBuf> {
+        let rom = self.open_rom(&path)
+                      .with_context(|| format!("Failed to open ROM {}", path.to_string_lossy()))?;
 
-        self.patch_status = PatchStatus::Patching;
-        let result = patcher::patch_rom(&mut rom_data);
-        if result.is_err() {
-            self.patch_status = PatchStatus::Error("Patch verification failed".to_string());
-        } else {
-            self.patch_status = PatchStatus::Success;
-        }
+        let patched_rom = self.patch_rom(rom)
+                              .with_context(|| "Failed to patch ROM")?;
 
-        self.rom_data = Some(rom_data);
+        let out_path = path.with_file_name(format!(
+            "{}_patched.z64",
+            path.file_stem().unwrap().to_string_lossy()
+        ));
+
+        std::fs::write(&out_path, patched_rom).with_context(|| format!("Failed to write patched ROM {}", out_path.to_string_lossy()))?;
+        Ok(out_path)
+    }
+
+    fn select_rom(&self) -> Option<PathBuf> {
+        rfd::FileDialog::new().add_filter("N64 ROM", &["z64"])
+                              .add_filter("All files", &["*"])
+                              .pick_file()
+    }
+
+    fn open_rom(&self, path: &PathBuf) -> Result<Vec<u8>> {
+        Ok(std::fs::read(&path)?)
+    }
+
+    fn patch_rom(&self, mut rom_data: Vec<u8>) -> Result<Vec<u8>> {
+        patcher::patch_rom(&mut rom_data)?;
+        Ok(rom_data)
     }
 
     fn reveal_in_file_manager(&self, path: &PathBuf) {
@@ -163,7 +138,6 @@ impl App {
             .spawn();
         #[cfg(target_os = "linux")]
         {
-            // Try all supported file managers in order of popularity
             let file = path.to_str().unwrap();
             let args = vec!["open", "--select", file];
             if let Ok(output) = std::process::Command::new("gio")

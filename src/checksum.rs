@@ -1,12 +1,6 @@
 /// N64 ROM checksum calculator — port of chksum.c
 /// Computes CRC1 and CRC2 exactly as SM64 boot code does.
 
-pub fn calculate_checksums(data: &[u8]) -> (u32, u32) {
-    let mut cksum = [0u32; 2];
-    sm64_calc_checksums_impl(data, &mut cksum);
-    (cksum[0], cksum[1])
-}
-
 /// Update checksum fields in the N64 ROM header at offsets 0x10 and 0x14.
 pub fn update_header_checksums(rom: &mut [u8]) {
     let (crc1, crc2) = calculate_checksums(rom);
@@ -14,8 +8,7 @@ pub fn update_header_checksums(rom: &mut [u8]) {
     write_u32_be(&mut rom[0x14..], crc2);
 }
 
-/// Derived from SM64 boot code (file.c at 0x59C).
-fn sm64_calc_checksums_impl(buf: &[u8], cksum: &mut [u32; 2]) {
+pub fn calculate_checksums(buf: &[u8]) -> (u32, u32) {
     let s6 = 0x3Fu32;
     let a0 = 0x1000u32;
     let at_val = 0x5D58_8B65u32;
@@ -89,8 +82,7 @@ fn sm64_calc_checksums_impl(buf: &[u8], cksum: &mut [u32; 2]) {
     let t8_final = s0 ^ a2;
     let result_s0 = t8_final ^ t4;
 
-    cksum[0] = result_a3;
-    cksum[1] = result_s0;
+    (result_a3, result_s0)
 }
 
 fn read_u32_be(buf: &[u8]) -> u32 {

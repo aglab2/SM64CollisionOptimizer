@@ -1,4 +1,4 @@
-#[path = "../build/embedded_data.rs"]
+#[path = "../../build/embedded_data.rs"]
 mod embedded_data;
 
 mod checksum;

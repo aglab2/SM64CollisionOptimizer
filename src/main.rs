@@ -124,7 +124,15 @@ impl eframe::App for App {
             let mut config = self.collision_config.clone();
 
             ui.group(|ui| {
-                ui.label("Wallkick Angle");
+                let wallkick_text = RichText::new("Wallkick Angle");
+                ui.horizontal(|ui| {
+                    ui.label(wallkick_text);
+                    ui.label(RichText::new("?").color(Color32::LIGHT_BLUE).small())
+                        .on_hover_ui(|ui| {
+                            ui.set_max_width(220.0);
+                            ui.label("The angle at which wallkicks activate. For 45 degree wallkicks, use 0x2001.");
+                        });
+                });
 
                 let mut deg = CollisionConfig::raw_to_degrees(config.wallkick_angle_raw);
                 ui.add(egui::Slider::new(&mut deg, 0.0..=90.0).suffix("°"));
@@ -141,13 +149,29 @@ impl eframe::App for App {
             });
 
             ui.group(|ui| {
-                ui.label("Quarter Steps");
-                ui.add(egui::Slider::new(&mut config.num_quarter_steps, 1..=16)
+                let quarter_text = RichText::new("Quarter Steps");
+                ui.horizontal(|ui| {
+                    ui.label(quarter_text);
+                    ui.label(RichText::new("?").color(Color32::LIGHT_BLUE).small())
+                        .on_hover_ui(|ui| {
+                            ui.set_max_width(220.0);
+                            ui.label("Number of sub-steps for collision checks per frame. More steps = more precise collision detection but has worse performance");
+                        });
+                });
+                ui.add(egui::Slider::new(&mut config.num_quarter_steps, 4..=16)
                     .suffix(" steps"));
             });
 
             ui.group(|ui| {
-                ui.label("Normal Floor/Ceil Threshold");
+                let threshold_text = RichText::new("Normal Floor/Ceil Threshold");
+                ui.horizontal(|ui| {
+                    ui.label(threshold_text);
+                    ui.label(RichText::new("?").color(Color32::LIGHT_BLUE).small())
+                        .on_hover_ui(|ui| {
+                            ui.set_max_width(220.0);
+                            ui.label("Maximum slope angle to be considered a floor/ceiling instead of a wall. Lower values = more very steep floors detection. Vanilla is 0.01");
+                        });
+                });
                 ui.add(egui::Slider::new(&mut config.normal_floor_ceil_threshold, 0.01..=0.08)
                     .suffix(""));
             });

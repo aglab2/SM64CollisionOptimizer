@@ -121,8 +121,6 @@ impl eframe::App for App {
         });
 
         ScrollArea::both().show(ui, |ui| {
-            let mut config = self.collision_config.clone();
-
             ui.group(|ui| {
                 let wallkick_text = RichText::new("Wallkick Angle");
                 ui.horizontal(|ui| {
@@ -134,18 +132,18 @@ impl eframe::App for App {
                         });
                 });
 
-                let mut deg = CollisionConfig::raw_to_degrees(config.wallkick_angle_raw);
+                let mut deg = CollisionConfig::raw_to_degrees(self.collision_config.wallkick_angle_raw);
                 ui.add(egui::Slider::new(&mut deg, 0.0..=90.0).suffix("°"));
-                config.wallkick_angle_raw = CollisionConfig::degrees_to_raw(deg);
+                self.collision_config.wallkick_angle_raw = CollisionConfig::degrees_to_raw(deg);
 
-                let mut raw = config.wallkick_angle_raw;
+                let mut raw = self.collision_config.wallkick_angle_raw;
                 ui.add(egui::DragValue::new(&mut raw)
                     .custom_formatter(|v, _| format!("0x{:04X}", v as u32).into())
                     .custom_parser(|s| {
                         parse_wallkick_angle(&s).map(|v| v as f64)
                     })
                     .speed(256.0));
-                config.wallkick_angle_raw = raw.min(0x7FFF);
+                self.collision_config.wallkick_angle_raw = raw.min(0x7FFF);
             });
 
             ui.group(|ui| {
@@ -158,7 +156,7 @@ impl eframe::App for App {
                             ui.label("Number of sub-steps for collision checks per frame. More steps = more precise collision detection but has worse performance");
                         });
                 });
-                ui.add(egui::Slider::new(&mut config.num_quarter_steps, 4..=16)
+                ui.add(egui::Slider::new(&mut self.collision_config.num_quarter_steps, 4..=16)
                     .suffix(" steps"));
             });
 
@@ -172,13 +170,9 @@ impl eframe::App for App {
                             ui.label("Maximum slope angle to be considered a floor/ceiling instead of a wall. Lower values = more very steep floors detection. Vanilla is 0.01");
                         });
                 });
-                ui.add(egui::Slider::new(&mut config.normal_floor_ceil_threshold, 0.01..=0.08)
+                ui.add(egui::Slider::new(&mut self.collision_config.normal_floor_ceil_threshold, 0.01..=0.08)
                     .suffix(""));
             });
-
-            if config != self.collision_config {
-                self.collision_config = config;
-            }
         });
 
         Panel::bottom("bottom_panel").show(ui, |ui| {

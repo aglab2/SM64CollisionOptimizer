@@ -13,6 +13,7 @@ struct CollisionConfig {
     wallkick_angle_raw: u16,
     num_quarter_steps: u16,
     normal_floor_ceil_threshold: f32,
+    add_wide_wallkick_surface_patch: bool,
 }
 
 /// Parse a wallkick angle string supporting both degrees and raw s16 values.
@@ -39,28 +40,31 @@ fn parse_wallkick_angle(input: &str) -> Option<u16> {
 }
 
 impl CollisionConfig {
-    /// Convert degrees to raw s16 angle value (DEGREES macro: degrees * 0x10000 / 360)
     fn degrees_to_raw(degrees: f64) -> u16 {
         ((degrees * 65536.0 / 360.0) as u16).min(0x7FFF)
     }
 
-    /// Convert raw s16 angle value to degrees
     fn raw_to_degrees(raw: u16) -> f64 {
         raw as f64 * 360.0 / 65536.0
     }
 
-    /// Pack into ROM bytes (big-endian, N64 format)
-    fn to_rom_bytes(&self) -> [u8; 12] {
+    fn to_rom_bytes(&self) -> [u8; 10] {
         let wallkick_fp = self.wallkick_angle_raw;
         let num_steps = self.num_quarter_steps as u16;
         let threshold = self.normal_floor_ceil_threshold;
+
+        let wallkick_fp_second = if self.add_wide_wallkick_surface_patch {
+            0x4000
+        } else {
+            wallkick_fp
+        };
 
         [
             (wallkick_fp >> 8) as u8, (wallkick_fp & 0xFF) as u8,
             (num_steps >> 8) as u8, (num_steps & 0xFF) as u8,
             threshold.to_be_bytes()[0], threshold.to_be_bytes()[1],
             threshold.to_be_bytes()[2], threshold.to_be_bytes()[3],
-            0, 0, 0, 0, // padding to 12 bytes
+            (wallkick_fp_second >> 8) as u8, (wallkick_fp_second & 0xFF) as u8,
         ]
     }
 }
@@ -71,6 +75,7 @@ impl Default for CollisionConfig {
             wallkick_angle_raw: 0x2000,
             num_quarter_steps: 4,
             normal_floor_ceil_threshold: 0.05,
+            add_wide_wallkick_surface_patch: false,
         }
     }
 }
@@ -96,7 +101,7 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "Better SM64 Collision Patcher",
+        "Better SM64 Collision",
         options,
         Box::new(|_cc| Ok(Box::new(App::default()))),
     )
@@ -173,12 +178,23 @@ impl eframe::App for App {
                 ui.add(egui::Slider::new(&mut self.collision_config.normal_floor_ceil_threshold, 0.01..=0.08)
                     .suffix(""));
             });
+
+            ui.group(|ui| {
+                ui.horizontal(|ui| {
+                    ui.checkbox(&mut self.collision_config.add_wide_wallkick_surface_patch, "Add wide wallkick surface patch");
+                    ui.label(RichText::new("?").color(Color32::LIGHT_BLUE).small())
+                        .on_hover_ui(|ui| {
+                            ui.set_max_width(220.0);
+                            ui.label("Enables wide collision patch with collision type 3.");
+                        });
+                });
+            });
         });
 
         Panel::bottom("bottom_panel").show(ui, |ui| {
             match &self.patch_status {
                 PatchStatus::Idle => {
-                    ui.label("Ready. Open a ROM file to begin.");
+                    ui.label("Ready.");
                 }
                 PatchStatus::Success => {
                     ui.label(RichText::new("ROM patched successfully!").color(Color32::GREEN),);

@@ -45,7 +45,9 @@ s32 lower_cell_index(struct MarioState *m, struct WallCollisionData *wallData) {
                 oldWallDYaw = wallDYaw;
                 set_mario_wall(m, wallData->walls[i]);
 
-                if (wallDYaw > DEGREES(180) - gCollisionConfig.wallkickAngle) {
+                s16 angle = (m->wall->type == 3) ? gCollisionConfig.wallkickAngleExt : gCollisionConfig.wallkickAngle;
+
+                if (wallDYaw > DEGREES(180) - angle) {
                     m->flags |= MARIO_AIR_HIT_WALL;
                     result = AIR_STEP_HIT_WALL;
                 }

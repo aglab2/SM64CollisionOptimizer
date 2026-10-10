@@ -36,7 +36,8 @@ CPP_FILES = \
 	extrapolate_vertex_y_position \
 	is_behind_surface \
 	find_floor_height_and_data \
-	add_ceil_margin
+	add_ceil_margin \
+	read_vertex_data
 
 INCLUDE_PATH = sm64-api/sm64
 LIBRARY_PATH = sm64-api/ld

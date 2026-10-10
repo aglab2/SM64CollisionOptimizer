@@ -1,5 +1,6 @@
 #include "types.h"
 #include "math_ex.h"
+#include "cfg.h"
 
 #define TerrainData s16
 #define Vec3t Vec3s
@@ -25,7 +26,7 @@ static inline struct Surface *alloc_surface(void) {
 }
 
 struct Surface *read_surface_data(s16 *vertexData, s16 **vertexIndices) {
-    Vec3f v[3];
+    Vec3i v[3];
     Vec3f n;
     Vec3t offset;
     s16 min, max;
@@ -36,7 +37,29 @@ struct Surface *read_surface_data(s16 *vertexData, s16 **vertexIndices) {
     vec3s_copy(v[1], (vertexData + offset[1]));
     vec3s_copy(v[2], (vertexData + offset[2]));
 
-    find_vector_perpendicular_to_plane(n, v[0], v[1], v[2]);
+    if (gCollisionConfig.impreciseCollision)
+    {
+        // Extended collision boundaries are trivializing collision to fit in original game boundaries
+        // Simulate this behavior by using shifts in a similar manner...
+        for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            v[i][j] >>= 2;
+
+        find_vector_perpendicular_to_plane(n, v[0], v[1], v[2]);
+
+        for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            v[i][j] <<= 2;
+    }
+    else
+    {
+        // ...but if we do NOT apply such changes, we can overflow the normal math so switch to floats
+        Vec3f vp[3];
+        for (int i = 0; i < 3; i++)
+            vec3_copy(vp[i], v[i]);
+
+        find_vector_perpendicular_to_plane(n, vp[0], vp[1], vp[2]);
+    }
 
     f32 mag = (sqr(n[0]) + sqr(n[1]) + sqr(n[2]));
     // This will never need to be run for custom levels because Fast64 does this step before exporting.
@@ -44,7 +67,7 @@ struct Surface *read_surface_data(s16 *vertexData, s16 **vertexIndices) {
     if (mag < NEAR_ZERO) {
         return NULL;
     }
-    mag = 1.0f / __builtin_sqrtf(mag);
+    mag = (f32)(1.0 / __builtin_sqrtf(mag));
     vec3_scale(n, mag);
 
     struct Surface *surface = alloc_surface();

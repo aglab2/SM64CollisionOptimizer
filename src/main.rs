@@ -14,6 +14,7 @@ struct CollisionConfig {
     num_quarter_steps: u16,
     normal_floor_ceil_threshold: f32,
     add_wide_wallkick_surface_patch: bool,
+    imprecise_collision: bool,
 }
 
 /// Parse a wallkick angle string supporting both degrees and raw s16 values.
@@ -48,7 +49,7 @@ impl CollisionConfig {
         raw as f64 * 360.0 / 65536.0
     }
 
-    fn to_rom_bytes(&self) -> [u8; 10] {
+    fn to_rom_bytes(&self) -> [u8; 11] {
         let wallkick_fp = self.wallkick_angle_raw;
         let num_steps = self.num_quarter_steps as u16;
         let threshold = self.normal_floor_ceil_threshold;
@@ -65,6 +66,7 @@ impl CollisionConfig {
             threshold.to_be_bytes()[0], threshold.to_be_bytes()[1],
             threshold.to_be_bytes()[2], threshold.to_be_bytes()[3],
             (wallkick_fp_second >> 8) as u8, (wallkick_fp_second & 0xFF) as u8,
+            if self.imprecise_collision { 1 } else { 0 },
         ]
     }
 }
@@ -76,6 +78,7 @@ impl Default for CollisionConfig {
             num_quarter_steps: 4,
             normal_floor_ceil_threshold: 0.05,
             add_wide_wallkick_surface_patch: false,
+            imprecise_collision: false,
         }
     }
 }
@@ -101,7 +104,7 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "Better SM64 Collision",
+        "Better Collision v0.3",
         options,
         Box::new(|_cc| Ok(Box::new(App::default()))),
     )
@@ -155,11 +158,7 @@ impl eframe::App for App {
                 let quarter_text = RichText::new("Quarter Steps");
                 ui.horizontal(|ui| {
                     ui.label(quarter_text);
-                    ui.label(RichText::new("?").color(Color32::LIGHT_BLUE).small())
-                        .on_hover_ui(|ui| {
-                            ui.set_max_width(220.0);
-                            ui.label("Number of sub-steps for collision checks per frame. More steps = more precise collision detection but has worse performance");
-                        });
+                    self.hint(ui, "Number of sub-steps for collision checks per frame. More steps = more precise collision detection but has worse performance");
                 });
                 ui.add(egui::Slider::new(&mut self.collision_config.num_quarter_steps, 4..=16)
                     .suffix(" steps"));
@@ -169,11 +168,7 @@ impl eframe::App for App {
                 let threshold_text = RichText::new("Normal Floor/Ceil Threshold");
                 ui.horizontal(|ui| {
                     ui.label(threshold_text);
-                    ui.label(RichText::new("?").color(Color32::LIGHT_BLUE).small())
-                        .on_hover_ui(|ui| {
-                            ui.set_max_width(220.0);
-                            ui.label("Maximum slope angle to be considered a floor/ceiling instead of a wall. Lower values = more very steep floors detection. Vanilla is 0.01");
-                        });
+                    self.hint(ui, "Maximum slope angle to be considered a floor/ceiling instead of a wall. Lower values = more very steep floors detection. Vanilla is 0.01");
                 });
                 ui.add(egui::Slider::new(&mut self.collision_config.normal_floor_ceil_threshold, 0.01..=0.08)
                     .suffix(""));
@@ -182,11 +177,14 @@ impl eframe::App for App {
             ui.group(|ui| {
                 ui.horizontal(|ui| {
                     ui.checkbox(&mut self.collision_config.add_wide_wallkick_surface_patch, "Add wide wallkick surface patch");
-                    ui.label(RichText::new("?").color(Color32::LIGHT_BLUE).small())
-                        .on_hover_ui(|ui| {
-                            ui.set_max_width(220.0);
-                            ui.label("Enables wide collision patch with collision type 3.");
-                        });
+                    self.hint(ui, "Enables wide collision patch with collision type 3.");
+                });
+            });
+
+            ui.group(|ui| {
+                ui.horizontal(|ui| {
+                    ui.checkbox(&mut self.collision_config.imprecise_collision, "Imprecise collision compatibility");
+                    self.hint(ui, "Simulates imprecise collision by original extended boundaries patch. Might be needed if you get 'wrong' angles with existing hack. Not recommended for newly made hacks.");
                 });
             });
         });
@@ -212,6 +210,14 @@ impl eframe::App for App {
 }
 
 impl App {
+    fn hint(&mut self, ui: &mut Ui, what: &'static str) {
+        ui.label(RichText::new("?").color(Color32::LIGHT_BLUE).small())
+            .on_hover_ui(|ui| {
+                ui.set_max_width(220.0);
+                ui.label(what);
+            });
+    }
+
     fn open_rom_dialog(&self) -> (Option<PathBuf>, PatchStatus) {
         let Some(path) = self.select_rom() else { return (None, PatchStatus::Idle) };
         let result = self.do_patch(path);

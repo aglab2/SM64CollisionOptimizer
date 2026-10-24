@@ -3,6 +3,7 @@ mod embedded_data;
 
 mod checksum;
 mod patcher;
+mod file_dialog;
 
 use egui::{Color32, Panel, RichText, ScrollArea, Ui, Vec2};
 use std::path::PathBuf;
@@ -88,6 +89,7 @@ struct App {
     patched_path: Option<PathBuf>,
     patch_status: PatchStatus,
     collision_config: CollisionConfig,
+    dialog_thread: file_dialog::DialogThread,
 }
 
 #[derive(Default)]
@@ -112,13 +114,38 @@ fn main() -> eframe::Result {
 
 impl eframe::App for App {
     fn ui(&mut self, ui: &mut Ui, _frame: &mut eframe::Frame) {
+        if let Some(opath) = self.dialog_thread.try_recv() {
+            if let Some(path) = opath {
+                match self.do_patch(path) {
+                    Ok(p) => {
+                        self.patched_path = Some(p);
+                        self.patch_status = PatchStatus::Success;
+                    }
+                    Err(e) => {
+                        self.patched_path = None;
+                        self.patch_status = PatchStatus::Error(format!("{}", e));
+                    }
+                }
+            } else {
+                self.patch_status = PatchStatus::Idle;
+            }
+        }
+
+        if self.dialog_thread.is_pending() {
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.spinner();
+                    ui.label("Selecting ROM...");
+                });
+            });
+            return;
+        }
+
         // Top panel with file selection
         Panel::top("top_panel").show(ui, |ui| {
             ui.horizontal(|ui| {
-                if ui.button("Open ROM").clicked() {
-                    let (path, status) = self.open_rom_dialog();
-                    self.patch_status = status;
-                    self.patched_path = path;
+                if ui.button("Open ROM").clicked() && !self.dialog_thread.is_pending() {
+                    self.dialog_thread.request(file_dialog::DialogRequest::OpenRom);
                 }
                 if let Some(ref path) = self.patched_path {
                     if ui.button("Reveal Patched ROM").clicked() {
@@ -218,21 +245,6 @@ impl App {
             });
     }
 
-    fn open_rom_dialog(&self) -> (Option<PathBuf>, PatchStatus) {
-        let Some(path) = self.select_rom() else { return (None, PatchStatus::Idle) };
-        let result = self.do_patch(path);
-
-        match result {
-            Ok(path) => {
-                (Some(path), PatchStatus::Success)
-            },
-
-            Err(e) => {
-                (None, PatchStatus::Error(format!("{}", e)))
-            }
-        }
-    }
-
     fn do_patch(&self, path: PathBuf) -> Result<PathBuf> {
         let rom = self.open_rom(&path)
                          .with_context(|| format!("Failed to open ROM {}", path.to_string_lossy()))?;
@@ -256,12 +268,6 @@ impl App {
 
         std::fs::write(&out_path, patched_rom).with_context(|| format!("Failed to write patched ROM {}", out_path.display()))?;
         Ok(out_path)
-    }
-
-    fn select_rom(&self) -> Option<PathBuf> {
-        rfd::FileDialog::new().add_filter("N64 ROM", &["z64"])
-                              .add_filter("All files", &["*"])
-                              .pick_file()
     }
 
     fn open_rom(&self, path: &PathBuf) -> Result<Vec<u8>> {

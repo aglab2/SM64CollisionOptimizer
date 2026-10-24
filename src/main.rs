@@ -1,3 +1,5 @@
+const VERSION: &str = "0.4";
+
 #[path = "../build/embedded_data.rs"]
 mod embedded_data;
 
@@ -106,7 +108,7 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "Better Collision v0.3",
+        &format!("Better Collision v{VERSION}"),
         options,
         Box::new(|_cc| Ok(Box::new(App::default()))),
     )

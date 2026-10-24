@@ -77,7 +77,7 @@ impl Default for CollisionConfig {
         Self {
             wallkick_angle_raw: 0x2000,
             num_quarter_steps: 4,
-            normal_floor_ceil_threshold: 0.05,
+            normal_floor_ceil_threshold: 0.01,
             add_wide_wallkick_surface_patch: false,
             imprecise_collision: false,
         }
@@ -210,7 +210,13 @@ impl eframe::App for App {
 
             ui.group(|ui| {
                 ui.horizontal(|ui| {
-                    ui.checkbox(&mut self.collision_config.imprecise_collision, "Imprecise collision compatibility");
+                    if ui.checkbox(&mut self.collision_config.imprecise_collision, "Imprecise collision compatibility").changed() {
+                        if self.collision_config.imprecise_collision {
+                            self.collision_config.normal_floor_ceil_threshold = 0.05;
+                        } else {
+                            self.collision_config.normal_floor_ceil_threshold = 0.01;
+                        }
+                    }
                     self.hint(ui, "Simulates imprecise collision by original extended boundaries patch. Might be needed if you get 'wrong' angles with existing hack. Not recommended for newly made hacks.");
                 });
             });
